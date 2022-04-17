@@ -12,3 +12,7 @@ all: clean build
 
 run:
 	./process_generator.out
+
+test:
+	gcc ./Test/Dynamic_Array_Test.c -o Dynamic_Array_Test.out
+	./Dynamic_Array_Test.out
