@@ -1,4 +1,5 @@
 #pragma once
+#include <stdbool.h>
 #include "Dynamic_Array.h"
 
 // Provides a priority queue using a minheap
@@ -15,5 +16,7 @@ void PriorityQueuePush(PriorityQueue *pq, element_t element);
 void PriorityQueuePop(PriorityQueue *pq);
 
 element_t PriorityQueueGetMin(PriorityQueue *pq);
+
+bool PriorityQueueEmpty(PriorityQueue *pq);
 
 void DestroyPriorityQueue(PriorityQueue *pq);

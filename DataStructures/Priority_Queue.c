@@ -75,6 +75,11 @@ element_t PriorityQueueGetMin(PriorityQueue *pq)
     return PQ(0);
 }
 
+bool PriorityQueueEmpty(PriorityQueue *pq) 
+{
+    return pq->arr->size == 0;
+}
+
 void DestroyPriorityQueue(PriorityQueue *pq)
 {
     DestroyDynamicArray(pq->arr);

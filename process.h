@@ -6,4 +6,5 @@ typedef struct
     int pid;
     int priority;
     int arrivalTime;
+    int runningTime;
 } process;

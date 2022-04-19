@@ -18,3 +18,5 @@ test:
 	./Dynamic_Array_Test.out
 	gcc ./Test/Priority_Queue_Test.c ./DataStructures/Priority_Queue.c ./DataStructures/Dynamic_Array.c -o Priority_Queue_Test.out
 	./Priority_Queue_Test.out
+	#gcc -g ./Test/HPF_test.c ./SchedulingAlgorithms/HPF.c ./DataStructures/Priority_Queue.c ./DataStructures/Dynamic_Array.c -o HPF_test.out
+	#./HPF_test.out 1
