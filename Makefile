@@ -14,5 +14,7 @@ run:
 	./process_generator.out
 
 test:
-	gcc ./Test/Dynamic_Array_Test.c -o Dynamic_Array_Test.out
+	gcc ./Test/Dynamic_Array_Test.c ./DataStructures/Dynamic_Array.c -o Dynamic_Array_Test.out
 	./Dynamic_Array_Test.out
+	gcc ./Test/Priority_Queue_Test.c ./DataStructures/Priority_Queue.c ./DataStructures/Dynamic_Array.c -o Priority_Queue_Test.out
+	./Priority_Queue_Test.out
