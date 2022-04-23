@@ -7,4 +7,6 @@ typedef struct
     int priority;
     int arrivalTime;
     int runningTime;
+    int* remainingTime; // sabry update process block
+    int shmid_process;  // sabry update process block
 } process;
