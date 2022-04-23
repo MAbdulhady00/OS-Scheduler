@@ -19,14 +19,14 @@ int main(int argc, char *argv[])
     switch (algorithmType)
     {
     case 0:
-        SchedulingInit = HPFInit;
-        SchedulingEnqueue = HPFEnqueue;
-        SchedulingRunNext = HPFRunNext;
-        SchedulingTerminationHandler = HPFTerminationHandler; // possibly null
-        SchedulingTimeSlotHandler = NULL;
-        SchedulingDestroy = HPFDestroy;
+    //    SchedulingInit = HPFInit;
+      //  SchedulingEnqueue = HPFEnqueue;
+      //  SchedulingRunNext = HPFRunNext;
+      //  SchedulingTerminationHandler = HPFTerminationHandler; // possibly null
+      //  SchedulingTimeSlotHandler = NULL;
+      //  SchedulingDestroy = HPFDestroy;
 
-        ReadyQueue = SchedulingInit(NULL);
+      //  ReadyQueue = SchedulingInit(NULL);
         break;
 
     default:

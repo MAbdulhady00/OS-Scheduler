@@ -8,10 +8,8 @@ bool cmp(process *p1, process *p2)
 {
   if (p1->priority < p2->priority)
     return true;
-
   else if (p1->priority == p2->priority)
     return p1->arrivalTime < p2->arrivalTime;
-
   return false;
 }
 
