@@ -51,3 +51,6 @@ Module.symvers
 Mkfile.old
 dkms.conf
 .vscode/*
+#log and perf files
+scheduler.log
+scheduler.perf

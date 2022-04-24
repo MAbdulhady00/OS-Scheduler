@@ -20,8 +20,6 @@ test:
 	#./Priority_Queue_Test.out
 	#gcc -g ./Test/HPF_test.c ./SchedulingAlgorithms/HPF.c ./DataStructures/Priority_Queue.c ./DataStructures/Dynamic_Array.c -o HPF_test.out
 	#./HPF_test.out 1
-	#gcc ./Test/Input_Test.c ./DataStructures/LinkedQueue.c -o Input_Test.out
-	#./Input_Test.out processes.txt
 	#gcc ./Test/Circular_Queue_Test.c ./DataStructures/Circular_Queue.c -o Circular_Queue_Test.out
 	#./Circular_Queue_Test.out
 	#gcc -g ./Test/SRTN_test.c ./SchedulingAlgorithms/SRTN.c ./DataStructures/Priority_Queue.c ./DataStructures/Dynamic_Array.c -o SRTN_test.out
@@ -31,3 +29,10 @@ test:
 	#./SRTN_test_clk.out 1
 	gcc -g ./Test/RR_Test.c ./SchedulingAlgorithms/RR.c ./DataStructures/Circular_Queue.c -o RR_Test.out
 	./RR_Test.out
+	gcc -g ./Test/SRTN_test_clk.c ./SchedulingAlgorithms/SRTN.c ./DataStructures/Priority_Queue.c ./DataStructures/Dynamic_Array.c -o SRTN_test_clk.out
+	gcc process.c -o process.out
+	./SRTN_test_clk.out 1
+testIO:
+	gcc ./Test/IO_Test.c ./DataStructures/LinkedQueue.c -o IO_Test.out
+	./IO_Test.out
+
