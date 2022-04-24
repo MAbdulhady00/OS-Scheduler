@@ -36,17 +36,22 @@ int main(int argc, char *argv[])
         Time = getClk();
         // 5. Create a data structure for processes and provide it with its parameters.
         p = queue->front->val;
-        if (p->arrivalTime <= Time)
+        bool bufferReady = false;
+        while (p->arrivalTime <= Time)
         {
             msg.p = *p;
             fflush(stdout);
             // 6. Send the information to the scheduler at the appropriate time.
             msgsnd(msgid, &msg, sizeof(msg), !IPC_NOWAIT);
+            bufferReady = true;
             printf("Msg sent I will block now at Time %d\n", Time);
             kill(schedulerPId, SIGUSR1);
             //? msgrcv(msgid, &msg, sizeof(msg), 13, 0);
             dequeueLinkedQueue(queue);
+            p = queue->front->val;
         }
+        if (bufferReady)
+            kill(schedulerPId, SIGUSR2);
     }
     // 7. Clear clock and other resources
     clearResources(SIGINT);
@@ -61,7 +66,6 @@ void clearResources(int signum)
     msgctl(msgid, IPC_RMID, (struct msqid_ds *)0);
     destroyClk(true);
     // Must Be Removed ----------------------------------------------------------------------------------------------------
-    //TODO kill(clock,SIGINT);
     killpg(getpgrp(), SIGKILL);
     printf("Exiting...\n");
 }
@@ -168,14 +172,13 @@ void Initialize(int *schedulerPid)
 {
     printf("Started Initializing...\n");
     msgid = msgget(IPC_PRIVATE, IPC_CREAT | 0644);
-    
+
     struct msqid_ds ctrl;
     msgctl(msgid, IPC_STAT, &ctrl);
     ctrl.msg_qbytes = sizeof(msgBuffer);
     msgctl(msgid, IPC_SET, &ctrl);
 
-
-    printf("Shared Memeory Id of New Process is %d\n", msgid);
+    printf("Msg Queue Id of New Process is %d\n", msgid);
     int pid = fork();
     if (pid == -1)
     {
@@ -188,7 +191,7 @@ void Initialize(int *schedulerPid)
         if (pid == 0)
         {
             char str[20];
-            sprintf(str, "%d", msgid);                                      // copy shmid to str to be send to each process
+            sprintf(str, "%d", msgid);                                      // copy msgid to str to be send to each process
             int x = execl("./scheduler.out", "./scheduler.out", str, NULL); // create process
             if (x == -1)
             {
