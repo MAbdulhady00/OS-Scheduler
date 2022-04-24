@@ -10,6 +10,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <string.h>
+#include <termios.h>
+#include "./DataStructures/LinkedQueue.h"
 
 typedef short bool;
 #define true 1
@@ -17,6 +20,10 @@ typedef short bool;
 
 #define SHKEY 300
 
+struct msgBuffer{
+    long mtype;
+    process p;
+}msgBuffer;
 
 ///==============================
 //don't mess with this variable//

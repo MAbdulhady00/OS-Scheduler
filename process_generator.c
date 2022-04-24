@@ -1,7 +1,4 @@
 #include "headers.h"
-#include <string.h>
-#include "./DataStructures/LinkedQueue.h"
-#include <termios.h>
 
 void clearResources(int);
 void ReadInput(LinkedQueue *queue);
@@ -10,7 +7,7 @@ void Initialize(int *);
 
 LinkedQueue *queue = NULL;
 void *newProcess;
-int shmid;
+int msgid;
 
 int main(int argc, char *argv[])
 {
@@ -29,34 +26,47 @@ int main(int argc, char *argv[])
     // 4. Use this function after creating the clock process to initialize clock
     initClk();
     // To get time use this
-    int x = getClk();
-    printf("Current Time is %d\n", x);
     // TODO Generation Main Loop
-    while(1)
+    process *p;
+    int Time;
+    struct msgBuffer msg;
+    msg.mtype = 13;
+    while (queue->front)
     {
+        Time = getClk();
         // 5. Create a data structure for processes and provide it with its parameters.
-        // 6. Send the information to the scheduler at the appropriate time.
-       
+        p = queue->front->val;
+        if (p->arrivalTime <= Time)
+        {
+            msg.p = *p;
+            fflush(stdout);
+            // 6. Send the information to the scheduler at the appropriate time.
+            msgsnd(msgid, &msg, sizeof(msg), !IPC_NOWAIT);
+            printf("Msg sent I will block now at Time %d\n", Time);
+            kill(schedulerPId, SIGUSR1);
+            //? msgrcv(msgid, &msg, sizeof(msg), 13, 0);
+            dequeueLinkedQueue(queue);
+        }
     }
-     // 7. Clear clock and other resources
+    // 7. Clear clock and other resources
     clearResources(SIGINT);
 }
 
 void clearResources(int signum)
 {
     // TODO Clears all resources in case of interruption
-    printf("Clearing Resources Before Existing...\n");  
-    if(queue != NULL)
+    printf("Clearing Resources Before Existing...\n");
+    if (queue != NULL)
         DestroyLinkedQueue(queue);
-    shmctl(shmid, IPC_RMID, (struct shmid_ds *)0);    
+    msgctl(msgid, IPC_RMID, (struct msqid_ds *)0);
     destroyClk(true);
     // Must Be Removed ----------------------------------------------------------------------------------------------------
+    //TODO kill(clock,SIGINT);
     killpg(getpgrp(), SIGKILL);
     printf("Exiting...\n");
 }
 
 #pragma region IO Methods
-
 char getch(void)
 {
     char buf = 0;
@@ -157,11 +167,15 @@ int AskUser(int *position)
 void Initialize(int *schedulerPid)
 {
     printf("Started Initializing...\n");
-    shmid = shmget(IPC_PRIVATE, sizeof(process), IPC_CREAT | 0644);
-    printf("Shared Memeory Id of New Process is %d\n",shmid);
-    void *shmaddr = shmat(shmid, (void *)0, 0);
-    newProcess = shmaddr;
+    msgid = msgget(IPC_PRIVATE, IPC_CREAT | 0644);
+    
+    struct msqid_ds ctrl;
+    msgctl(msgid, IPC_STAT, &ctrl);
+    ctrl.msg_qbytes = sizeof(msgBuffer);
+    msgctl(msgid, IPC_SET, &ctrl);
 
+
+    printf("Shared Memeory Id of New Process is %d\n", msgid);
     int pid = fork();
     if (pid == -1)
     {
@@ -174,7 +188,7 @@ void Initialize(int *schedulerPid)
         if (pid == 0)
         {
             char str[20];
-            sprintf(str, "%d", shmid);                                      // copy shmid to str to be send to each process
+            sprintf(str, "%d", msgid);                                      // copy shmid to str to be send to each process
             int x = execl("./scheduler.out", "./scheduler.out", str, NULL); // create process
             if (x == -1)
             {
@@ -197,7 +211,7 @@ void Initialize(int *schedulerPid)
             {
                 // child
                 if (cpid == 0)
-                {                                     
+                {
                     int x = execl("./clk.out", "./clk.out", NULL, NULL); // create process
                     if (x == -1)
                     {
