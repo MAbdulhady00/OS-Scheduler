@@ -10,3 +10,5 @@ process *RRRunNext(void *ReadyQueue);
 void RRTerminationHandler(void *ReadyQueue, process *p);
 
 void RRDestroy(void *ReadyQueue);
+
+bool RREmpty(void *ReadyQueue);

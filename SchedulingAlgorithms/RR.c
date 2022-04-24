@@ -18,16 +18,11 @@ process *RRRunNext(void *ReadyQueue)
 {
     if (isCircularQueueEmpty((CircularQueue *)ReadyQueue))
         return NULL;
-    process *p = peekCircularQueue((CircularQueue *)ReadyQueue);
+    process *p = dequeueCircularQueue((CircularQueue *)ReadyQueue);
 
     // TODO: FORK next process possibly need to implement a new function as this will be shared among all algorithms
 
     return p;
-}
-
-void RRClkHandler(void * ReadyQueue)
-{
-    
 }
 
 void RRTerminationHandler(void *ReadyQueue, process *p)
@@ -38,4 +33,8 @@ void RRTerminationHandler(void *ReadyQueue, process *p)
 void RRDestroy(void *ReadyQueue)
 {
     destroyCircularQueue((CircularQueue *)ReadyQueue);
+}
+bool RREmpty(void *ReadyQueue)
+{
+    return isCircularQueueEmpty((CircularQueue *) ReadyQueue) ;
 }
