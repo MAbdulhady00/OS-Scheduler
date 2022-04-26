@@ -46,16 +46,8 @@ element_t dequeueCircularQueue(CircularQueue *Q)
     if (Q->front != NULL)
     {
         node *tmp = Q->front;
-        if(Q->front != Q->rear)
-        {
-            Q->front = Q->front->next;
-            Q->rear->next = Q->front;   
-        }
-        else
-        {
-            Q->front = NULL;
-            Q->rear = NULL;
-        }
+        Q->front = Q->front->next;
+        Q->rear->next = Q->front;
         return tmp->val;
     }
     // empty Circular Queue

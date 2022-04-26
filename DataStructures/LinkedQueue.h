@@ -1,5 +1,5 @@
 #pragma once
-#include "../process.h"
+#include "../process_data.h"
 #define element_t process * // Change this to change LinkedQueue type used
 struct node
 {

@@ -1,5 +1,5 @@
 #pragma once
-#include "../process.h"
+#include "../process_data.h"
 #define element_t process * // Change this to change dynamic array type used
 // Provides dynamically sized array with no range checking
 typedef struct

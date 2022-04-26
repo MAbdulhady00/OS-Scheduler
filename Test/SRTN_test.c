@@ -95,7 +95,6 @@ int main(int argc, char *argv[])
                        p->pid, p->priority, p->arrivalTime);
             p = NULL;
         }
-        
         if (p == NULL)
         {
             p = SRTNRunNext(ReadyQueue);

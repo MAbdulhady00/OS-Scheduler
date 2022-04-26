@@ -3,7 +3,7 @@
 void clearResources(int);
 void ReadInput(LinkedQueue *queue);
 int AskUser(int *);
-void Initialize(int *);
+void Initialize(int *, int);
 
 LinkedQueue *queue = NULL;
 void *newProcess;
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     quantum = AskUser(&algo);
     // 3. Initiate and create the scheduler and clock processes.
     int schedulerPId;
-    Initialize(&schedulerPId);
+    Initialize(&schedulerPId, algo);
     // 4. Use this function after creating the clock process to initialize clock
     initClk();
     // To get time use this
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
             msg.p = *p;
             fflush(stdout);
             // 6. Send the information to the scheduler at the appropriate time.
-            msgsnd(msgid, &msg, sizeof(msg), !IPC_NOWAIT);
+            msgsnd(msgid, &msg, sizeof(msg), 0);
             bufferReady = true;
             printf("Msg sent I will block now at Time %d\n", Time);
             kill(schedulerPId, SIGUSR1);
@@ -168,7 +168,7 @@ int AskUser(int *position)
 
 #pragma region Initization Methods
 
-void Initialize(int *schedulerPid)
+void Initialize(int *schedulerPid, int algo)
 {
     printf("Started Initializing...\n");
     msgid = msgget(IPC_PRIVATE, IPC_CREAT | 0644);
@@ -190,9 +190,10 @@ void Initialize(int *schedulerPid)
         // Child
         if (pid == 0)
         {
-            char str[20];
+            char str[20], str2[20];
             sprintf(str, "%d", msgid);                                      // copy msgid to str to be send to each process
-            int x = execl("./scheduler.out", "./scheduler.out", str, NULL); // create process
+            sprintf(str2, "%d", algo);
+            int x = execl("./scheduler.out", "./scheduler.out", str, str2, NULL); // create process
             if (x == -1)
             {
                 printf("Error in execution");

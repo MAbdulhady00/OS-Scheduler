@@ -1,13 +1,14 @@
 #include "headers.h"
 
 void handler(int signum);
+
 /* Modify this file as needed*/
 int* remainingtime;
 
 int main(int agrc, char * argv[])
 {
     initClk();
-    signal(SIGINT,handler);
+
     int shmid = atoi(argv[1]);
     
     void *shmaddr = shmat(shmid, (void *)0, 0);
@@ -30,9 +31,9 @@ int main(int agrc, char * argv[])
     }
     
     destroyClk(false);
-    //kill(getppid(),SIGUSR1);
     return 0;
 }
+
 void handler(int signum)
 {
     destroyClk(false);

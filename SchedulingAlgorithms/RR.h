@@ -1,5 +1,5 @@
 #pragma once
-#include "../process.h"
+#include "../process_data.h"
 
 void *RRInit(void *args);
 
@@ -10,5 +10,3 @@ process *RRRunNext(void *ReadyQueue);
 void RRTerminationHandler(void *ReadyQueue, process *p);
 
 void RRDestroy(void *ReadyQueue);
-
-bool RREmpty(void *ReadyQueue);

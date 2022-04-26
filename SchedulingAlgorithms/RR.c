@@ -4,8 +4,20 @@
 #include "RR.h"
 #include "../DataStructures/Circular_Queue.h"
 
+#ifdef scheduler_c
+#define EXTERN
+#else
+#define EXTERN extern
+#endif
+EXTERN process* CurrentProcess;
+
+int quantum_size;
+int curr_quantum;
+
 void *RRInit(void *args)
 {
+    quantum_size = *((int*)args);
+    curr_quantum = quantum_size;
     return CreateCircularQueue();
 }
 
@@ -18,23 +30,24 @@ process *RRRunNext(void *ReadyQueue)
 {
     if (isCircularQueueEmpty((CircularQueue *)ReadyQueue))
         return NULL;
-    process *p = dequeueCircularQueue((CircularQueue *)ReadyQueue);
+    process *p = peekCircularQueue((CircularQueue *)ReadyQueue);
 
     // TODO: FORK next process possibly need to implement a new function as this will be shared among all algorithms
 
     return p;
 }
 
+void RRClkHandler(void * ReadyQueue)
+{
+    
+}
+
 void RRTerminationHandler(void *ReadyQueue, process *p)
 {
-    // process will already be popped anyway
+    curr_quantum = quantum_size;
 }
 
 void RRDestroy(void *ReadyQueue)
 {
     destroyCircularQueue((CircularQueue *)ReadyQueue);
-}
-bool RREmpty(void *ReadyQueue)
-{
-    return isCircularQueueEmpty((CircularQueue *) ReadyQueue) ;
 }

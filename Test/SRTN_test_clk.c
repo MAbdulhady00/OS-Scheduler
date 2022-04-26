@@ -1,5 +1,5 @@
 
-#include "../headers.h"
+#include"../headers.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -12,6 +12,12 @@ void create_process(process * forked_process);
 
 int main(int argc, char *argv[])
 {
+    pid_t id = fork();
+    if(id == 0) {
+        execl("./clk.out", "./clk.out", NULL);
+    }
+
+    sleep(1);
     initClk();
     bool visualtest = true;
     process *p;
