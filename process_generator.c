@@ -40,33 +40,39 @@ int main(int argc, char *argv[])
         while (p->arrivalTime <= Time)
         {
             msg.p = *p;
-            fflush(stdout);
             // 6. Send the information to the scheduler at the appropriate time.
-            msgsnd(msgid, &msg, sizeof(msg), 0);
+            msgsnd(msgid, &msg, sizeof(msg.p), 0);
             bufferReady = true;
-            printf("Msg sent I will block now at Time %d\n", Time);
+            printf("PID: %d, Msg sent I will block now at Time %d\n", msg.p.pid, Time);
             kill(schedulerPId, SIGUSR1);
             //? msgrcv(msgid, &msg, sizeof(msg), 13, 0);
             dequeueLinkedQueue(queue);
+            if(queue->front == NULL)
+                break;
             p = queue->front->val;
         }
         if (bufferReady)
             kill(schedulerPId, SIGUSR2);
     }
+    
+    kill(schedulerPId, SIGURG);
+    //Sleep to give a chance for scheduler to recieve last msg(TODO find a better way)
+    sleep(1);
     // 7. Clear clock and other resources
     clearResources(SIGINT);
+
+    return 0;
 }
 
 void clearResources(int signum)
 {
+    signal(SIGINT, NULL);
     // TODO Clears all resources in case of interruption
     printf("Clearing Resources Before Existing...\n");
     if (queue != NULL)
         DestroyLinkedQueue(queue);
     msgctl(msgid, IPC_RMID, (struct msqid_ds *)0);
-    destroyClk(true);
-    // Must Be Removed ----------------------------------------------------------------------------------------------------
-    killpg(getpgrp(), SIGKILL);
+    destroyClk(false);
     printf("Exiting...\n");
 }
 

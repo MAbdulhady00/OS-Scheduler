@@ -1,4 +1,5 @@
 #define scheduler_c
+#include <errno.h>
 #include "headers.h"
 #include "process_data.h"
 #include "IO.h"
@@ -18,7 +19,8 @@ EXTERN FILE *logFile, *perfFile;
 DynamicArray *ProcessTable; // Might need to change to hashtable
 
 struct msgBuffer msg;
-int msgid;
+int msgid = 0;
+bool GenerationRunning = true;
 
 void *ReadyQueue;
 void *(*SchedulingInit)(void *);
@@ -31,6 +33,7 @@ void (*SchedulingDestroy)(void *);
 void NewProcess(int signum);
 void ProcessTermination(int signum);
 void NewProcessFinalize(int signum);
+void GenerationFinalize(int signum);
 void clearResources(int signum);
 typedef enum AlgorithmType
 {
@@ -43,14 +46,16 @@ void initialize(AlgorithmType);
 int main(int argc, char *argv[])
 {
     signal(SIGINT, clearResources);
+    signal(SIGURG, GenerationFinalize);
     signal(SIGUSR2, NewProcessFinalize);
     signal(SIGCHLD, ProcessTermination);
 
-    // Make SIGUSR1 block SIGUSR2
+    // Make SIGUSR1 block SIGUSR2 & SIGCHLD
     struct sigaction setup_action;
     sigset_t block_mask;
     sigemptyset(&block_mask);
     sigaddset(&block_mask, SIGUSR2);
+    sigaddset(&block_mask, SIGCHLD);
     setup_action.sa_handler = NewProcess;
     setup_action.sa_mask = block_mask;
     setup_action.sa_flags = 0;
@@ -58,12 +63,12 @@ int main(int argc, char *argv[])
 
     initClk();
     msgid = atoi(argv[1]);
-    printf("Scheduler's msgid: %s, Algorithm: %s\n", argv[1], argv[2]);
+    printf("Scheduler's msgid: %d, Algorithm: %s\n", msgid, argv[2]);
     initialize(atoi(argv[2]));
     printf("Initialized!\n");
     int time_before = -1;
     time_after = getClk();
-    while (true)
+    while (GenerationRunning || CurrentProcess != NULL)
     {
         while (time_after <= time_before)
         {
@@ -80,14 +85,15 @@ int main(int argc, char *argv[])
     SchedulingDestroy(ReadyQueue);
     // upon termination release the clock resources.
     destroyClk(true);
+    return 0;
 }
 
 void NewProcess(int signum)
 {
     printf("Attempting to recieve msg \n");
-    msgrcv(msgid, &msg, sizeof(msg), 13, 0);
+    msgrcv(msgid, &msg, sizeof(msg.p), 13, 0);
     printf("Process recieved: %d\n", msg.p.pid);
-
+         
     process *p = malloc(sizeof(process));
     memcpy(p, &(msg.p), sizeof(process));
     push_back(ProcessTable, p);
@@ -96,13 +102,18 @@ void NewProcess(int signum)
 
 void NewProcessFinalize(int signum)
 {
-    SchedulingNewProcessFinalizationHandler(ReadyQueue);
-    
+    time_after = getClk();
+    SchedulingNewProcessFinalizationHandler(ReadyQueue);  
+}
+
+void GenerationFinalize(int signum) 
+{
+    GenerationRunning = false;
 }
 
 void ProcessTermination(int signum)
 {
-    //wait(NULL);
+    time_after = getClk();
     SchedulingTerminationHandler(ReadyQueue);
 }
 
@@ -141,10 +152,13 @@ void initialize(AlgorithmType algorithmType)
 
     ReadyQueue = SchedulingInit(NULL);
 
+    msg.mtype = 13;
+
     initializeOut(&logFile, &perfFile);
 }
 
 void clearResources(int signum)
 {
+    printf("Clearing scheduler resources...\n");
     freeOut(logFile, perfFile);
 }

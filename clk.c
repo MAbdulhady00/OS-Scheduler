@@ -37,8 +37,11 @@ int main(int argc, char * argv[])
         exit(-1);
     }
     *shmaddr = clk; /* initialize shared memory */
+    //Sleep to give chance for other process to fork (TODO FIND BETTER WAY)
+    sleep(1);
     while (1)
     {
+        //usleep(50000); //fast clock for testing
         sleep(1);
         (*shmaddr)++;
     }
