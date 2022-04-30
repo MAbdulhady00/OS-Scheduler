@@ -13,7 +13,7 @@
 #else
 #define EXTERN extern
 #endif
-EXTERN process *CurrentProcess;
+EXTERN process *CurrentProcess = NULL;
 EXTERN int time_after = 0;
 EXTERN FILE *logFile, *perfFile;
 DynamicArray *ProcessTable; // Might need to change to hashtable
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, clearResources);
     signal(SIGURG, GenerationFinalize);
     signal(SIGUSR2, NewProcessFinalize);
-    signal(SIGCHLD, ProcessTermination);
+    signal(SIGALRM, ProcessTermination);
 
     // Make SIGUSR1 block SIGUSR2 & SIGCHLD
     struct sigaction setup_action;
@@ -60,6 +60,26 @@ int main(int argc, char *argv[])
     setup_action.sa_mask = block_mask;
     setup_action.sa_flags = 0;
     sigaction(SIGUSR1, &setup_action, NULL);
+
+    // struct sigaction setup_action2;
+    // sigset_t block_mask2;
+    // sigemptyset(&block_mask2);
+    // sigaddset(&block_mask2, SIGUSR1);
+    // sigaddset(&block_mask2, SIGCHLD);
+    // setup_action.sa_handler = NewProcessFinalize;
+    // setup_action.sa_mask = block_mask2;
+    // setup_action.sa_flags = 0;
+    // sigaction(SIGUSR2, &setup_action2, NULL);
+
+    // struct sigaction setup_action3;
+    // sigset_t block_mask3;
+    // sigemptyset(&block_mask3);
+    // sigaddset(&block_mask3, SIGUSR1);
+    // sigaddset(&block_mask3, SIGUSR2);
+    // setup_action.sa_handler = ProcessTermination;
+    // setup_action.sa_mask = block_mask3;
+    // setup_action.sa_flags = 0;
+    // sigaction(SIGCHLD, &setup_action3, NULL);
 
     initClk();
     msgid = atoi(argv[1]);
@@ -93,9 +113,14 @@ void NewProcess(int signum)
     printf("Attempting to recieve msg \n");
     msgrcv(msgid, &msg, sizeof(msg.p), 13, 0);
     printf("Process recieved: %d\n", msg.p.pid);
-         
     process *p = malloc(sizeof(process));
     memcpy(p, &(msg.p), sizeof(process));
+    int shmid = shmget(IPC_PRIVATE, 4, IPC_CREAT | 0644); // create shared memory for process remaining time
+    p->shmid_process = shmid; // store shmid of process to be sent & deleted later
+    void *shmaddr = shmat(shmid, (void *)0, 0);
+    p->remainingTime = (int*)shmaddr;
+    *p->remainingTime = p->runningTime;
+
     push_back(ProcessTable, p);
     SchedulingNewProcessHandler(ReadyQueue, p);
 }
@@ -114,6 +139,7 @@ void GenerationFinalize(int signum)
 void ProcessTermination(int signum)
 {
     time_after = getClk();
+    //waitpid(CurrentProcess->pWaitId, NULL, 0);
     SchedulingTerminationHandler(ReadyQueue);
 }
 
@@ -137,7 +163,7 @@ void initialize(AlgorithmType algorithmType)
     case SRTN:
         SchedulingInit = SRTNInit;
         SchedulingNewProcessHandler = SRTNNewProcessHandler;
-        SchedulingNewProcessFinalizationHandler = SRTNNewProcessFinalizationHandler; // ?!!!!!!
+        SchedulingNewProcessFinalizationHandler = SRTNNewProcessFinalizationHandler;
         SchedulingTerminationHandler = SRTNTerminationHandler;
         SchedulingTimeSlotHandler = NULL;
         SchedulingDestroy = SRTNDestroy;
