@@ -9,6 +9,6 @@ process *SRTNRunNext(void *ReadyQueue);
 
 void SRTNNewProcessHandler(void* ReadyQueue, process* p);
 void SRTNTerminationHandler(void *ReadyQueue);
-
+void SRTNNewProcessFinalizationHandler(void *ReadyQueue);
 void SRTNDestroy(void *ReadyQueue);
 bool SRTNEmpty(void *ReadyQueue);

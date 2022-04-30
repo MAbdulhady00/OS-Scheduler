@@ -137,6 +137,7 @@ void initialize(AlgorithmType algorithmType)
     case SRTN:
         SchedulingInit = SRTNInit;
         SchedulingNewProcessHandler = SRTNNewProcessHandler;
+        SchedulingNewProcessFinalizationHandler = SRTNNewProcessFinalizationHandler; // ?!!!!!!
         SchedulingTerminationHandler = SRTNTerminationHandler;
         SchedulingTimeSlotHandler = NULL;
         SchedulingDestroy = SRTNDestroy;
