@@ -8,6 +8,7 @@ void Initialize(int *, int, int);
 LinkedQueue *queue = NULL;
 void *newProcess;
 int msgid;
+bool Interuption = true;
 
 int main(int argc, char *argv[])
 {
@@ -15,7 +16,9 @@ int main(int argc, char *argv[])
     // TODO Initialization
     // 1. Read the input files.
     queue = CreateLinkedQueue();
+    printf("Reading \n");
     ReadInput(queue);
+    printf("Finish Reading \n");
     // 2. Ask the user for the chosen scheduling algorithm and its parameters, if there are any.
     int algo;
     int quantum;
@@ -57,8 +60,12 @@ int main(int argc, char *argv[])
     
     kill(schedulerPId, SIGURG);
     //Sleep to give a chance for scheduler to recieve last msg(TODO find a better way)
-    sleep(1);
+    //sleep(1);
+    int stat_loc =0;
+    waitpid(schedulerPId,&stat_loc,0);
+
     // 7. Clear clock and other resources
+    Interuption = false;
     clearResources(SIGINT);
 
     return 0;

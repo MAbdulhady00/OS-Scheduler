@@ -41,6 +41,11 @@ void handler_continue(int signum)
     time_after = getClk();
     time_before = getClk();
 }
+// void handler_stop(int signum)
+// {
+//     time_after = getClk();
+//     time_before = getClk();
+// }
 void handler(int signum)
 {
     destroyClk(false);

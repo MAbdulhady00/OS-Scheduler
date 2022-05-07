@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
             time_after = getClk();
         }
         time_before = getClk();
-        //printf("CLK: %d\n", time_after);
+        printf("CLK: %d\n", time_after);
         if (SchedulingTimeSlotHandler != NULL)
         {
             SchedulingTimeSlotHandler(ReadyQueue);
@@ -206,4 +206,10 @@ void clearResources(int signum)
 {
     printf("Clearing scheduler resources...\n");
     freeOut(logFile, perfFile);
+    for(int i=0;i<ProcessTable->size;i++)
+    {
+        process* p = ProcessTable->data[i];
+        shmctl(p->shmid_process, IPC_RMID, (struct shmid_ds *)0);
+    }
+    
 }

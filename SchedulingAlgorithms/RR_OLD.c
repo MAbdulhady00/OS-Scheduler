@@ -5,7 +5,6 @@
 #include "RR.h"
 #include "../DataStructures/Circular_Queue.h"
 #include "../IO.h"
-#include <signal.h>
 
 #ifdef scheduler_c
 #define EXTERN
@@ -67,36 +66,30 @@ void SetQuantum(int q)
 
 void RRNewProcessHandler(void *ReadyQueue, process *p)
 {
-    RREnqueue(ReadyQueue, p);
+    if(CurrentProcess != NULL) {
+
+        //TODO: LOG ENQUEUE
+
+        RREnqueue(ReadyQueue, p);
+        //printf("No Errors\n");
+        return;
+    }
+    else
+    {
+        //create_process(p);
+        //RREnqueue(ReadyQueue, p);
+    }
 }
 
 void RRNewProcessFinalizationHandler(void *ReadyQueue)
 {
     //printf("Starting A Process\n");
-    
-    if(CurrentProcess != NULL)
-    {
-        return;
-    }
     process *p = RRRunNext(ReadyQueue);
-    curr_quantum = 0;
-    if(p->state == STOPPED)
-    {
-        kill(p->pWaitId,SIGCONT);
-        p->state = RESUMED;
-        printf("Process %d Resumed! remain time %d\n", p ->pid ,*p->remainingTime);
-        logProcess(logFile, p, time_after);
-        CurrentProcess = p;
-    }
-    else
-    {
-        create_process(p);
-        p->state = STARTED;
-        p->waitTime = p->waitTime == 0 ? time_after - p->arrivalTime : p->waitTime;
-        CurrentProcess = p;
-        logProcess(logFile, p, time_after);
-    }
-
+    //if(p->state == )
+    create_process(p);
+    p->waitTime = p->waitTime == 0 ? time_after - p->arrivalTime : p->waitTime;
+    CurrentProcess = p;
+    logProcess(logFile, p, time_after);
     //printf("Started A Process\n");
 }
 
@@ -115,47 +108,24 @@ process *RRRunNext(void *ReadyQueue)
 
 void SwitchProcess(void *ReadyQueue)
 {
-
     if (isCircularQueueEmpty((CircularQueue *)ReadyQueue) == false)
     {
-        if(CurrentProcess != NULL)
-        {
-            printf("Process %d Switched!\n", CurrentProcess->pid);
-            // Stop Current Process
-            kill((pid_t)CurrentProcess->pWaitId, SIGSTOP);
-            CurrentProcess->state = STOPPED;
-            logProcess(logFile, CurrentProcess, time_after);
-            RREnqueue(ReadyQueue, CurrentProcess);
-        }
+        printf("Process %d Switched!\n", CurrentProcess->pid);
+        // Stop Current Process
+        CurrentProcess->state = STOPPED;
+        logProcess(logFile, CurrentProcess, time_after);
+        RREnqueue(ReadyQueue, CurrentProcess);
 
-        // // Start Next One
-        // process *p = RRRunNext(ReadyQueue);
-        // create_process(p);
-        // //p->waitTime = p->waitTime == 0 ? time_after - p->arrivalTime : p->waitTime;
-        // CurrentProcess = p;
-        // logProcess(logFile, p, time_after);
+        // Start Next One
         process *p = RRRunNext(ReadyQueue);
-        if(p->state == STOPPED)
-        {
-            kill(p->pWaitId,SIGCONT);
-            p->state = RESUMED;
-            printf("Process %d Resumed! remain time %d\n", p ->pid ,*p->remainingTime);
-            logProcess(logFile, p, time_after);
-            CurrentProcess = p;
-        }
-        else
-        {
-            create_process(p);
-            p->state = STARTED;
-            p->waitTime = p->waitTime == 0 ? time_after - p->arrivalTime : p->waitTime;
-            CurrentProcess = p;
-            logProcess(logFile, p, time_after);
-        }
+        create_process(p);
+        p->waitTime = p->waitTime == 0 ? time_after - p->arrivalTime : p->waitTime;
+        CurrentProcess = p;
+        logProcess(logFile, p, time_after);
     }
     else
     {
-        //curr_quantum = quantum_size - 1;
-        //curr_quantum = 0;
+        curr_quantum = quantum_size - 1;
     }
 }
 
@@ -163,8 +133,6 @@ void RRTimeSlotHandler(void *ReadyQueue)
 {
     if (CurrentProcess == NULL)
     {
-        curr_quantum = 0;
-        SwitchProcess(ReadyQueue);   
         return;
     }
     curr_quantum++;
@@ -177,15 +145,12 @@ void RRTimeSlotHandler(void *ReadyQueue)
 
 void RRTerminationHandler(void *ReadyQueue)
 {
-    printf("Process %d terminated!\n", CurrentProcess->pid);
+    //printf("Process %d terminated!\n", CurrentProcess->pid);
     CurrentProcess->state = FINISHED;
     CurrentProcess->finishTime = time_after;
     logProcess(logFile, CurrentProcess, time_after);
     shmctl(CurrentProcess->shmid_process, IPC_RMID, (struct shmid_ds *)0);
     CurrentProcess = NULL;
-    curr_quantum = 0;
-    SwitchProcess(ReadyQueue);
-
 }
 
 void RRDestroy(void *ReadyQueue)
