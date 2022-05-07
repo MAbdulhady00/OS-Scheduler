@@ -5,6 +5,7 @@
 
 void create_process(process * forked_process)
 {
+<<<<<<< HEAD
     if (1)
     {
         //printf("Creating process for %d\n", forked_process->pid);
@@ -18,6 +19,17 @@ void create_process(process * forked_process)
         *forked_process->remainingTime =  forked_process->runningTime;
     }
     
+=======
+    printf("Creating process for %d\n", forked_process->pid);
+    fflush(stdout);
+    // int shmid = shmget(IPC_PRIVATE, 4, IPC_CREAT | 0644); // create shared memory for process remaining time
+    
+    // forked_process->shmid_process = shmid;           // store shmid of process to be sent & deleted later
+    // void *shmaddr = shmat(shmid, (void *)0, 0);
+    // //int remain_time = *forked_process->remainingTime;
+    // forked_process->remainingTime = (int*)shmaddr;
+    // *forked_process->remainingTime =  forked_process->runningTime;
+>>>>>>> 25e126ab2922b17ada220c3c2d443e679562b0df
     forked_process->state = STARTED;
     forked_process->pWaitId = fork();                    // store pid of process
     
