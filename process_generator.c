@@ -3,7 +3,7 @@
 void clearResources(int);
 void ReadInput(LinkedQueue *queue);
 int AskUser(int *);
-void Initialize(int *, int);
+void Initialize(int *, int, int);
 
 LinkedQueue *queue = NULL;
 void *newProcess;
@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     quantum = AskUser(&algo);
     // 3. Initiate and create the scheduler and clock processes.
     int schedulerPId;
-    Initialize(&schedulerPId, algo);
+    Initialize(&schedulerPId, algo, quantum);
     // 4. Use this function after creating the clock process to initialize clock
     initClk();
     // To get time use this
@@ -174,7 +174,7 @@ int AskUser(int *position)
 
 #pragma region Initization Methods
 
-void Initialize(int *schedulerPid, int algo)
+void Initialize(int *schedulerPid, int algo, int q)
 {
     printf("Started Initializing...\n");
     msgid = msgget(IPC_PRIVATE, IPC_CREAT | 0644);
@@ -196,10 +196,19 @@ void Initialize(int *schedulerPid, int algo)
         // Child
         if (pid == 0)
         {
-            char str[20], str2[20];
+            char str[20], str2[20], str3[20];
             sprintf(str, "%d", msgid);                                      // copy msgid to str to be send to each process
-            sprintf(str2, "%d", algo);
-            int x = execl("./scheduler.out", "./scheduler.out", str, str2, NULL); // create process
+            sprintf(str2, "%d", algo);       
+            int x;
+            if (algo == 3)
+            {
+                sprintf(str3, "%d", q);
+                int x = execl("./scheduler.out", "./scheduler.out", str, str2, str3, NULL); // create process
+            }
+            else
+            {
+                int x = execl("./scheduler.out", "./scheduler.out", str, str2, NULL); // create process
+            }
             if (x == -1)
             {
                 printf("Error in execution");

@@ -6,6 +6,8 @@
 #include "./DataStructures/Dynamic_Array.h"
 #include "./SchedulingAlgorithms/HPF.h"
 #include "./SchedulingAlgorithms/SRTN.h"
+#include "./SchedulingAlgorithms/RR.h"
+
 #define PROCESS_TABLE_INITIAL_CAPACITY 31
 
 #ifdef scheduler_c
@@ -35,6 +37,7 @@ void ProcessTermination(int signum);
 void NewProcessFinalize(int signum);
 void GenerationFinalize(int signum);
 void clearResources(int signum);
+
 typedef enum AlgorithmType
 {
     HPF = 1,
@@ -42,6 +45,7 @@ typedef enum AlgorithmType
     RR = 3,
 } AlgorithmType;
 void initialize(AlgorithmType);
+int quantum = 0;
 
 int main(int argc, char *argv[])
 {
@@ -63,7 +67,15 @@ int main(int argc, char *argv[])
 
     initClk();
     msgid = atoi(argv[1]);
-    printf("Scheduler's msgid: %d, Algorithm: %s\n", msgid, argv[2]);
+    if(argc > 3)
+    {
+        quantum  = atoi(argv[3]);
+        printf("Scheduler's msgid: %d, Algorithm: %s, Quantum: %d\n", msgid, argv[2], quantum);
+    }
+    else
+    {
+        printf("Scheduler's msgid: %d, Algorithm: %s\n", msgid, argv[2]);
+    }
     initialize(atoi(argv[2]));
     printf("Initialized!\n");
     int time_before = -1;
@@ -75,15 +87,16 @@ int main(int argc, char *argv[])
             time_after = getClk();
         }
         time_before = getClk();
-        printf("CLK: %d\n", time_after);
+        //printf("CLK: %d\n", time_after);
         if (SchedulingTimeSlotHandler != NULL)
         {
-            SchedulingTimeSlotHandler();
+            SchedulingTimeSlotHandler(ReadyQueue);
         }
     }
 
     SchedulingDestroy(ReadyQueue);
     // upon termination release the clock resources.
+    // With true sent all other processes will die too
     destroyClk(true);
     return 0;
 }
@@ -143,8 +156,13 @@ void initialize(AlgorithmType algorithmType)
         break;
 
     case RR:
-        // get quantum
-        // quantum = atoi(argv[3]);
+        SetQuantum(quantum);
+        SchedulingInit = RRInit;
+        SchedulingNewProcessHandler = RRNewProcessHandler;
+        SchedulingNewProcessFinalizationHandler = RRNewProcessFinalizationHandler;
+        SchedulingTerminationHandler = RRTerminationHandler;
+        SchedulingTimeSlotHandler = RRTimeSlotHandler;
+        SchedulingDestroy = RRDestroy;
         break;
     default:
         break;
