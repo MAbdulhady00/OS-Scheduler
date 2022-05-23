@@ -24,6 +24,8 @@ function safeDiv(a, b) {
     var div = a / b;
     if (div === Infinity)
         return "inf";
+    if (isNaN(div))
+        return "-nan";
     return div.toFixed(2);
 }
 function rr(processId, arrivalTime, burstTime, timeQuantum) {

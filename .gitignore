@@ -51,6 +51,7 @@ Module.symvers
 Mkfile.old
 dkms.conf
 .vscode/*
+node_modules/
 #log and perf files
 scheduler.log
 scheduler.perf

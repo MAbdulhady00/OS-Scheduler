@@ -4,6 +4,7 @@
 #include "HPF.h"
 #include "../DataStructures/Priority_Queue.h"
 #include "../IO.h"
+#include "../process_data.h"
 
 #ifdef scheduler_c
 #define EXTERN
@@ -67,6 +68,7 @@ void HPFTerminationHandler(void *ReadyQueue)
     CurrentProcess->state = FINISHED;
     CurrentProcess->finishTime = time_after;
     logProcess(logFile, CurrentProcess, time_after);
+    shmdt(CurrentProcess->remainingTime);
     shmctl(CurrentProcess->shmid_process, IPC_RMID, (struct shmid_ds *)0);
     CurrentProcess = NULL;
     // if (PriorityQueueEmpty((PriorityQueue *)ReadyQueue)) 

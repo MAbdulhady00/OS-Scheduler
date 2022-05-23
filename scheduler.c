@@ -52,19 +52,19 @@ int main(int argc, char *argv[])
 {
     signal(SIGINT, clearResources);
     signal(SIGURG, GenerationFinalize);
-    signal(SIGUSR2, NewProcessFinalize);
-    signal(SIGALRM, ProcessTermination);
+    //signal(SIGUSR2, NewProcessFinalize);
+    //signal(SIGALRM, ProcessTermination);
 
     // Make SIGUSR1 block SIGUSR2 & SIGCHLD
-    struct sigaction setup_action;
-    sigset_t block_mask;
-    sigemptyset(&block_mask);
-    sigaddset(&block_mask, SIGUSR2);
-    sigaddset(&block_mask, SIGCHLD);
-    setup_action.sa_handler = NewProcess;
-    setup_action.sa_mask = block_mask;
-    setup_action.sa_flags = 0;
-    sigaction(SIGUSR1, &setup_action, NULL);
+    //struct sigaction setup_action;
+    //sigset_t block_mask;
+    //sigemptyset(&block_mask);
+    //sigaddset(&block_mask, SIGUSR2);
+    //sigaddset(&block_mask, SIGCHLD);
+    //setup_action.sa_handler = NewProcess;
+    //setup_action.sa_mask = block_mask;
+    //setup_action.sa_flags = 0;
+    //sigaction(SIGUSR1, &setup_action, NULL);
 
     // struct sigaction setup_action2;
     // sigset_t block_mask2;
@@ -100,10 +100,10 @@ int main(int argc, char *argv[])
     initialize(atoi(argv[2]));
     printf("Initialized!\n");
     int time_before = -1;
-    time_after = getClk();
     while (GenerationRunning || CurrentProcess != NULL)
     {   
-        recievedFromGenerator = false;
+        time_before = getClk();
+        time_after = getClk();
         while(GenerationRunning) {
             printf("Attempting to recieve msg \n");
             msgrcv(msgid, &msg, sizeof(msg.p), 0, 0);
@@ -114,24 +114,27 @@ int main(int argc, char *argv[])
             process *p = malloc(sizeof(process));
             
             memcpy(p, &(msg.p), sizeof(process));
-            int shmid = shmget(IPC_PRIVATE, 4, IPC_CREAT | 0644); // create shared memory for process remaining time
-            p->shmid_process = shmid; // store shmid of process to be sent & deleted later
-            void *shmaddr = shmat(shmid, (void *)0, 0);
-            p->remainingTime = (int*)shmaddr;
+            p->remainingTime = malloc(sizeof(int));
             *p->remainingTime = p->runningTime;
             
             
             push_back(ProcessTable, p);
             SchedulingNewProcessHandler(ReadyQueue, p);
         }
+        
         SchedulingNewProcessFinalizationHandler(ReadyQueue);
-        recievedFromGenerator = true;
-        time_after = getClk();
+        while(CurrentProcess != NULL && *CurrentProcess->remainingTime <= 0) {
+            waitpid(CurrentProcess->pWaitId, NULL, 0);
+            SchedulingTerminationHandler(ReadyQueue);
+            SchedulingNewProcessFinalizationHandler(ReadyQueue);
+        }
+        
 
         while (time_after <= time_before)
         {
             time_after = getClk();
         }
+
         time_before = getClk();
         printf("CLK: %d\n", time_after);
         if (SchedulingTimeSlotHandler != NULL)

@@ -1,0 +1,57 @@
+#At time x process y state arr w total z remain y wait k
+At time 4 process 1 started arr 4 total 1 remain 1 wait 0
+At time 5 process 1 finished arr 4 total 1 remain 0 wait 0 TA 1 WTA 1.00
+At time 14 process 2 started arr 14 total 2 remain 2 wait 0
+At time 16 process 2 finished arr 14 total 2 remain 0 wait 0 TA 2 WTA 1.00
+At time 18 process 3 started arr 18 total 17 remain 17 wait 0
+At time 35 process 3 finished arr 18 total 17 remain 0 wait 0 TA 17 WTA 1.00
+At time 35 process 7 started arr 35 total 1 remain 1 wait 0
+At time 36 process 7 finished arr 35 total 1 remain 0 wait 0 TA 1 WTA 1.00
+At time 36 process 9 started arr 36 total 3 remain 3 wait 0
+At time 39 process 9 finished arr 36 total 3 remain 0 wait 0 TA 3 WTA 1.00
+At time 39 process 4 started arr 18 total 14 remain 14 wait 21
+At time 53 process 4 finished arr 18 total 14 remain 0 wait 21 TA 35 WTA 2.50
+At time 53 process 10 started arr 41 total 25 remain 25 wait 12
+At time 78 process 10 finished arr 41 total 25 remain 0 wait 12 TA 37 WTA 1.48
+At time 78 process 17 started arr 78 total 13 remain 13 wait 0
+At time 91 process 17 finished arr 78 total 13 remain 0 wait 0 TA 13 WTA 1.00
+At time 91 process 15 started arr 68 total 6 remain 6 wait 23
+At time 97 process 15 finished arr 68 total 6 remain 0 wait 23 TA 29 WTA 4.83
+At time 97 process 21 started arr 90 total 15 remain 15 wait 7
+At time 112 process 21 finished arr 90 total 15 remain 0 wait 7 TA 22 WTA 1.47
+At time 112 process 14 started arr 66 total 19 remain 19 wait 46
+At time 131 process 14 finished arr 66 total 19 remain 0 wait 46 TA 65 WTA 3.42
+At time 131 process 28 started arr 123 total 3 remain 3 wait 8
+At time 134 process 28 finished arr 123 total 3 remain 0 wait 8 TA 11 WTA 3.67
+At time 134 process 16 started arr 75 total 22 remain 22 wait 59
+At time 156 process 16 finished arr 75 total 22 remain 0 wait 59 TA 81 WTA 3.68
+At time 156 process 18 started arr 84 total 22 remain 22 wait 72
+At time 178 process 18 finished arr 84 total 22 remain 0 wait 72 TA 94 WTA 4.27
+At time 178 process 20 started arr 88 total 3 remain 3 wait 90
+At time 181 process 20 finished arr 88 total 3 remain 0 wait 90 TA 93 WTA 31.00
+At time 181 process 13 started arr 57 total 3 remain 3 wait 124
+At time 184 process 13 finished arr 57 total 3 remain 0 wait 124 TA 127 WTA 42.33
+At time 184 process 5 started arr 23 total 6 remain 6 wait 161
+At time 190 process 5 finished arr 23 total 6 remain 0 wait 161 TA 167 WTA 27.83
+At time 190 process 6 started arr 32 total 22 remain 22 wait 158
+At time 212 process 6 finished arr 32 total 22 remain 0 wait 158 TA 180 WTA 8.18
+At time 212 process 11 started arr 45 total 3 remain 3 wait 167
+At time 215 process 11 finished arr 45 total 3 remain 0 wait 167 TA 170 WTA 56.67
+At time 215 process 24 started arr 111 total 23 remain 23 wait 104
+At time 238 process 24 finished arr 111 total 23 remain 0 wait 104 TA 127 WTA 5.52
+At time 238 process 8 started arr 35 total 1 remain 1 wait 203
+At time 239 process 8 finished arr 35 total 1 remain 0 wait 203 TA 204 WTA 204.00
+At time 239 process 12 started arr 55 total 17 remain 17 wait 184
+At time 256 process 12 finished arr 55 total 17 remain 0 wait 184 TA 201 WTA 11.82
+At time 256 process 22 started arr 98 total 2 remain 2 wait 158
+At time 258 process 22 finished arr 98 total 2 remain 0 wait 158 TA 160 WTA 80.00
+At time 258 process 23 started arr 102 total 0 remain 0 wait 156
+At time 258 process 23 finished arr 102 total 0 remain 0 wait 156 TA 156 WTA inf
+At time 258 process 25 started arr 111 total 5 remain 5 wait 147
+At time 263 process 25 finished arr 111 total 5 remain 0 wait 147 TA 152 WTA 30.40
+At time 263 process 26 started arr 113 total 5 remain 5 wait 150
+At time 268 process 26 finished arr 113 total 5 remain 0 wait 150 TA 155 WTA 31.00
+At time 268 process 19 started arr 86 total 29 remain 29 wait 182
+At time 297 process 19 finished arr 86 total 29 remain 0 wait 182 TA 211 WTA 7.28
+At time 297 process 27 started arr 118 total 18 remain 18 wait 179
+At time 315 process 27 finished arr 118 total 18 remain 0 wait 179 TA 197 WTA 10.94

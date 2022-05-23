@@ -32,8 +32,8 @@ int main(int agrc, char * argv[])
         // remainingtime = ??;
     }
     
+    shmdt(shmaddr);
     destroyClk(false);
-    kill(getppid(),SIGALRM);
     return 0;
 }
 void handler_continue(int signum)

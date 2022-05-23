@@ -41,7 +41,7 @@ int main(int argc, char * argv[])
     sleep(1);
     while (1)
     {
-        usleep(50000); //fast clock for testing
+        usleep(35000); //fast clock for testing
         //sleep(1);
         (*shmaddr)++;
     }
