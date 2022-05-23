@@ -22,7 +22,13 @@ int main(int argc, char *argv[])
     // 2. Ask the user for the chosen scheduling algorithm and its parameters, if there are any.
     int algo;
     int quantum;
-    quantum = AskUser(&algo);
+    if(argc <= 1)
+        quantum = AskUser(&algo);
+    else {
+        algo = atoi(argv[1]);
+        if(algo == 3)
+            quantum = atoi(argv[2]);
+    }
     // 3. Initiate and create the scheduler and clock processes.
     int schedulerPId;
     Initialize(&schedulerPId, algo, quantum);
@@ -31,7 +37,7 @@ int main(int argc, char *argv[])
     // To get time use this
     // TODO Generation Main Loop
     process *p;
-    int Time;
+    int Time, time_after;
     struct msgBuffer msg;
     msg.mtype = 13;
     while (queue->front)
@@ -40,25 +46,30 @@ int main(int argc, char *argv[])
         // 5. Create a data structure for processes and provide it with its parameters.
         p = queue->front->val;
         bool bufferReady = false;
-        while (p->arrivalTime <= Time)
+        while (p->arrivalTime - 1 <= Time)
         {
             msg.p = *p;
+            msg.mtype = 2; 
             // 6. Send the information to the scheduler at the appropriate time.
             msgsnd(msgid, &msg, sizeof(msg.p), 0);
             bufferReady = true;
             printf("PID: %d, Msg sent I will block now at Time %d\n", msg.p.pid, Time);
-            kill(schedulerPId, SIGUSR1);
+            //kill(schedulerPId, SIGUSR1);
             //? msgrcv(msgid, &msg, sizeof(msg), 13, 0);
             dequeueLinkedQueue(queue);
             if(queue->front == NULL)
                 break;
             p = queue->front->val;
         }
-        if (bufferReady)
-            kill(schedulerPId, SIGUSR2);
+        time_after = getClk();
+        while(time_after == Time)
+            time_after = getClk();
+        msg.mtype = 1;
+        msgsnd(msgid, &msg, sizeof(msg.p), 0);
     }
-    
     kill(schedulerPId, SIGURG);
+    msg.mtype = 1;
+    msgsnd(msgid, &msg, sizeof(msg.p), 0);
     //Sleep to give a chance for scheduler to recieve last msg(TODO find a better way)
     //sleep(1);
     int stat_loc =0;

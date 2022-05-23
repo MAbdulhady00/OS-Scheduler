@@ -17,8 +17,14 @@ int main(int argc, char * argv[])
     pFile = fopen("processes.txt", "w");
     int no;
     struct processData pData;
-    printf("Please enter the number of processes you want to generate: ");
-    scanf("%d", &no);
+    if(argc <= 1) {
+        printf("Please enter the number of processes you want to generate: ");
+        scanf("%d", &no);
+    }
+    else {
+        no = atoi(argv[1]);
+    }
+
     srand(time(null));
     //fprintf(pFile,"%d\n",no);
     fprintf(pFile, "#id arrival runtime priority\n");

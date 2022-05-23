@@ -102,6 +102,26 @@ int main(int argc, char *argv[])
     time_after = getClk();
     while (GenerationRunning || CurrentProcess != NULL)
     {
+        while(GenerationRunning) {
+            //printf("Attempting to recieve msg \n");
+            msgrcv(msgid, &msg, sizeof(msg.p), 0, 0);
+            //printf("Process recieved: %d\n", msg.p.pid);
+            if(msg.mtype <= 1)
+                break;
+            process *p = malloc(sizeof(process));
+            memcpy(p, &(msg.p), sizeof(process));
+            int shmid = shmget(IPC_PRIVATE, 4, IPC_CREAT | 0644); // create shared memory for process remaining time
+            p->shmid_process = shmid; // store shmid of process to be sent & deleted later
+            void *shmaddr = shmat(shmid, (void *)0, 0);
+            p->remainingTime = (int*)shmaddr;
+            *p->remainingTime = p->runningTime;
+
+            push_back(ProcessTable, p);
+            SchedulingNewProcessHandler(ReadyQueue, p);
+        }
+        time_after = getClk();
+        SchedulingNewProcessFinalizationHandler(ReadyQueue);
+
         while (time_after <= time_before)
         {
             time_after = getClk();
@@ -123,25 +143,13 @@ int main(int argc, char *argv[])
 
 void NewProcess(int signum)
 {
-    printf("Attempting to recieve msg \n");
-    msgrcv(msgid, &msg, sizeof(msg.p), 13, 0);
-    printf("Process recieved: %d\n", msg.p.pid);
-    process *p = malloc(sizeof(process));
-    memcpy(p, &(msg.p), sizeof(process));
-    int shmid = shmget(IPC_PRIVATE, 4, IPC_CREAT | 0644); // create shared memory for process remaining time
-    p->shmid_process = shmid; // store shmid of process to be sent & deleted later
-    void *shmaddr = shmat(shmid, (void *)0, 0);
-    p->remainingTime = (int*)shmaddr;
-    *p->remainingTime = p->runningTime;
-
-    push_back(ProcessTable, p);
-    SchedulingNewProcessHandler(ReadyQueue, p);
+    return; //lol
 }
 
 void NewProcessFinalize(int signum)
 {
-    time_after = getClk();
-    SchedulingNewProcessFinalizationHandler(ReadyQueue);  
+    //time_after = getClk();
+    //SchedulingNewProcessFinalizationHandler(ReadyQueue);  
 }
 
 void GenerationFinalize(int signum) 
@@ -197,8 +205,6 @@ void initialize(AlgorithmType algorithmType)
 
     ReadyQueue = SchedulingInit(NULL);
 
-    msg.mtype = 13;
-
     initializeOut(&logFile, &perfFile);
 }
 
@@ -211,5 +217,4 @@ void clearResources(int signum)
         process* p = ProcessTable->data[i];
         shmctl(p->shmid_process, IPC_RMID, (struct shmid_ds *)0);
     }
-    
 }

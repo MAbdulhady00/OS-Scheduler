@@ -37,7 +37,7 @@ void HPFNewProcessHandler(void *ReadyQueue, process *p)
 
 void HPFNewProcessFinalizationHandler(void *ReadyQueue)
 {
-    if(CurrentProcess != NULL)
+    if(CurrentProcess != NULL || PriorityQueueEmpty((PriorityQueue *)ReadyQueue))
         return;
     process *p = PriorityQueueGetMin((PriorityQueue *)ReadyQueue);
     PriorityQueuePop((PriorityQueue *)ReadyQueue);
