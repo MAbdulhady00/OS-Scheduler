@@ -22,6 +22,7 @@ DynamicArray *ProcessTable; // Might need to change to hashtable
 
 struct msgBuffer msg;
 int msgid = 0;
+bool recievedFromGenerator = true;
 bool GenerationRunning = true;
 
 void *ReadyQueue;
@@ -101,26 +102,31 @@ int main(int argc, char *argv[])
     int time_before = -1;
     time_after = getClk();
     while (GenerationRunning || CurrentProcess != NULL)
-    {
+    {   
+        recievedFromGenerator = false;
         while(GenerationRunning) {
-            //printf("Attempting to recieve msg \n");
+            printf("Attempting to recieve msg \n");
             msgrcv(msgid, &msg, sizeof(msg.p), 0, 0);
-            //printf("Process recieved: %d\n", msg.p.pid);
+            printf("recieved type: %ld\n", msg.mtype);
             if(msg.mtype <= 1)
                 break;
+            
             process *p = malloc(sizeof(process));
+            
             memcpy(p, &(msg.p), sizeof(process));
             int shmid = shmget(IPC_PRIVATE, 4, IPC_CREAT | 0644); // create shared memory for process remaining time
             p->shmid_process = shmid; // store shmid of process to be sent & deleted later
             void *shmaddr = shmat(shmid, (void *)0, 0);
             p->remainingTime = (int*)shmaddr;
             *p->remainingTime = p->runningTime;
-
+            
+            
             push_back(ProcessTable, p);
             SchedulingNewProcessHandler(ReadyQueue, p);
         }
-        time_after = getClk();
         SchedulingNewProcessFinalizationHandler(ReadyQueue);
+        recievedFromGenerator = true;
+        time_after = getClk();
 
         while (time_after <= time_before)
         {
@@ -160,8 +166,10 @@ void GenerationFinalize(int signum)
 void ProcessTermination(int signum)
 {
     time_after = getClk();
-    //waitpid(CurrentProcess->pWaitId, NULL, 0);
+    waitpid(CurrentProcess->pWaitId, NULL, 0);
     SchedulingTerminationHandler(ReadyQueue);
+    if(!recievedFromGenerator)
+        SchedulingNewProcessFinalizationHandler(ReadyQueue);
 }
 
 void initialize(AlgorithmType algorithmType)

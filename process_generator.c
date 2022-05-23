@@ -5,7 +5,7 @@ void ReadInput(LinkedQueue *queue);
 int AskUser(int *);
 void Initialize(int *, int, int);
 
-LinkedQueue *queue = NULL;
+LinkedQueue *queue = NULL, *bufferQueue = NULL;
 void *newProcess;
 int msgid;
 bool Interuption = true;
@@ -16,17 +16,19 @@ int main(int argc, char *argv[])
     // TODO Initialization
     // 1. Read the input files.
     queue = CreateLinkedQueue();
+    bufferQueue = CreateLinkedQueue();
     printf("Reading \n");
     ReadInput(queue);
     printf("Finish Reading \n");
     // 2. Ask the user for the chosen scheduling algorithm and its parameters, if there are any.
     int algo;
     int quantum;
-    if(argc <= 1)
+    if (argc <= 1)
         quantum = AskUser(&algo);
-    else {
+    else
+    {
         algo = atoi(argv[1]);
-        if(algo == 3)
+        if (algo == 3)
             quantum = atoi(argv[2]);
     }
     // 3. Initiate and create the scheduler and clock processes.
@@ -37,43 +39,54 @@ int main(int argc, char *argv[])
     // To get time use this
     // TODO Generation Main Loop
     process *p;
-    int Time, time_after;
+    int Time, count, time_after = getClk();
     struct msgBuffer msg;
-    msg.mtype = 13;
     while (queue->front)
     {
         Time = getClk();
         // 5. Create a data structure for processes and provide it with its parameters.
         p = queue->front->val;
-        bool bufferReady = false;
-        while (p->arrivalTime - 1 <= Time)
+        count = 0;
+        while (p->arrivalTime <= Time)
         {
-            msg.p = *p;
-            msg.mtype = 2; 
-            // 6. Send the information to the scheduler at the appropriate time.
-            msgsnd(msgid, &msg, sizeof(msg.p), 0);
-            bufferReady = true;
-            printf("PID: %d, Msg sent I will block now at Time %d\n", msg.p.pid, Time);
-            //kill(schedulerPId, SIGUSR1);
-            //? msgrcv(msgid, &msg, sizeof(msg), 13, 0);
+            // Count the amount of processe in current time
             dequeueLinkedQueue(queue);
-            if(queue->front == NULL)
+            enqueueLinkedQueue(bufferQueue, p);
+            ++count;
+            if (queue->front == NULL)
                 break;
             p = queue->front->val;
         }
-        time_after = getClk();
-        while(time_after == Time)
-            time_after = getClk();
+
+        while (count > 0)
+        {
+            p = bufferQueue->front->val;
+            msg.p = *p;
+            msg.mtype = count + 1;
+            printf("PID: %d, Msg sent I will block now at Time %d\n", msg.p.pid, Time);
+            msgsnd(msgid, &msg, sizeof(msg.p), 0);
+            printf("msg send!\n");
+            --count;
+            dequeueLinkedQueue(bufferQueue);
+        }
+
         msg.mtype = 1;
         msgsnd(msgid, &msg, sizeof(msg.p), 0);
+
+        // Sleep for next clk cycle
+        while (time_after <= Time)
+        {
+            time_after = getClk();
+        }
     }
+
     kill(schedulerPId, SIGURG);
-    msg.mtype = 1;
-    msgsnd(msgid, &msg, sizeof(msg.p), 0);
-    //Sleep to give a chance for scheduler to recieve last msg(TODO find a better way)
-    //sleep(1);
-    int stat_loc =0;
-    waitpid(schedulerPId,&stat_loc,0);
+    //msg.mtype = 1;
+    //msgsnd(msgid, &msg, sizeof(msg.p), 0);
+    // Sleep to give a chance for scheduler to recieve last msg(TODO find a better way)
+    // sleep(1);
+    int stat_loc = 0;
+    waitpid(schedulerPId, &stat_loc, 0);
 
     // 7. Clear clock and other resources
     Interuption = false;
@@ -89,6 +102,9 @@ void clearResources(int signum)
     printf("Clearing Resources Before Existing...\n");
     if (queue != NULL)
         DestroyLinkedQueue(queue);
+    if (bufferQueue != NULL)
+        DestroyLinkedQueue(bufferQueue);
+
     msgctl(msgid, IPC_RMID, (struct msqid_ds *)0);
     destroyClk(false);
     printf("Exiting...\n");
@@ -215,8 +231,8 @@ void Initialize(int *schedulerPid, int algo, int q)
         if (pid == 0)
         {
             char str[20], str2[20], str3[20];
-            sprintf(str, "%d", msgid);                                      // copy msgid to str to be send to each process
-            sprintf(str2, "%d", algo);       
+            sprintf(str, "%d", msgid); // copy msgid to str to be send to each process
+            sprintf(str2, "%d", algo);
             int x;
             if (algo == 3)
             {

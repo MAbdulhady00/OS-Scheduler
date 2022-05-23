@@ -69,15 +69,15 @@ void HPFTerminationHandler(void *ReadyQueue)
     logProcess(logFile, CurrentProcess, time_after);
     shmctl(CurrentProcess->shmid_process, IPC_RMID, (struct shmid_ds *)0);
     CurrentProcess = NULL;
-    if (PriorityQueueEmpty((PriorityQueue *)ReadyQueue)) 
-       return;     
+    // if (PriorityQueueEmpty((PriorityQueue *)ReadyQueue)) 
+    //    return;     
 
-    process *p = PriorityQueueGetMin((PriorityQueue *)ReadyQueue);
-    PriorityQueuePop((PriorityQueue *)ReadyQueue);
-    create_process(p);
-    p->waitTime = time_after - p->arrivalTime;
-    CurrentProcess = p;
-    logProcess(logFile, p, time_after);
+    // process *p = PriorityQueueGetMin((PriorityQueue *)ReadyQueue);
+    // PriorityQueuePop((PriorityQueue *)ReadyQueue);
+    // create_process(p);
+    // p->waitTime = time_after - p->arrivalTime;
+    // CurrentProcess = p;
+    // logProcess(logFile, p, time_after);
 }
 
 void HPFDestroy(void *ReadyQueue)
