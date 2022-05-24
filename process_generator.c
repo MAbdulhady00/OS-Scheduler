@@ -145,7 +145,7 @@ void ReadInput(LinkedQueue *Q)
     {
         perror("file can't be opened \n");
     }
-
+    int arrivalId = 1;
     while ((read = getline(&line, &len, file)) != -1)
     {
         if (line[0] == '#')
@@ -155,6 +155,7 @@ void ReadInput(LinkedQueue *Q)
         tmp->arrivalTime = atoi(strtok(NULL, "\t"));
         tmp->runningTime = atoi(strtok(NULL, "\t"));
         tmp->priority = atoi(strtok(NULL, "\t"));
+        tmp->arrivalId = arrivalId++;
         enqueueLinkedQueue(Q, tmp);
     }
     if (line)

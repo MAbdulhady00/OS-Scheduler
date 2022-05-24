@@ -20,6 +20,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 exports.__esModule = true;
+var args = process.argv;
 function safeDiv(a, b) {
     var div = a / b;
     if (div === Infinity)
@@ -104,6 +105,7 @@ function rr(processId, arrivalTime, burstTime, timeQuantum) {
                 readyQueue.splice(indexToRemoveRQ, 1);
             }
             solvedProcessesInfo.push(__assign(__assign({}, processToExecute), { ft: currentTime, tat: currentTime - processToExecute.at, wat: currentTime - processToExecute.at - processToExecute.bt }));
+            console.log("At time ".concat(currentTime, " process ").concat(processToExecute.job, " finished arr ").concat(processToExecute.at, " total ").concat(processToExecute.bt, " remain 0 wait ").concat(currentTime - processToExecute.at - processToExecute.bt, " TA ").concat(currentTime - processToExecute.at, " WTA ").concat(safeDiv((currentTime - processToExecute.at), (processToExecute.bt))));
         }
     };
     while (Object.values(remainingTime).reduce(function (acc, cur) {
@@ -124,7 +126,7 @@ function rr(processId, arrivalTime, burstTime, timeQuantum) {
             return -1;
         return 0;
     });
-    console.log(solvedProcessesInfo);
+    return solvedProcessesInfo;
 }
 ;
 function npp(processId, arrivalTime, burstTime, priorities) {
@@ -262,6 +264,170 @@ function npp(processId, arrivalTime, burstTime, priorities) {
     //console.log(solvedProcessesInfo);
 }
 ;
+function srtf(processId, arrivalTime, burstTime) {
+    var processesInfo = processId
+        .map(function (item, index) {
+        return {
+            job: item,
+            at: arrivalTime[index],
+            bt: burstTime[index]
+        };
+    })
+        .sort(function (obj1, obj2) {
+        if (obj1.at > obj2.at)
+            return 1;
+        if (obj1.at < obj2.at)
+            return -1;
+        if (obj1.bt > obj2.bt)
+            return 1;
+        if (obj1.bt < obj2.bt)
+            return -1;
+        return 0;
+    });
+    var solvedProcessesInfo = [];
+    //const ganttChartInfo: ganttChartInfoType = [];
+    var readyQueue = [];
+    var currentTime = processesInfo[0].at;
+    var unfinishedJobs = __spreadArray([], processesInfo, true);
+    var remainingTime = processesInfo.reduce(function (acc, process) {
+        acc[process.job] = process.bt;
+        return acc;
+    }, {});
+    readyQueue.push(unfinishedJobs[0]);
+    var _loop_3 = function () {
+        var prevIdle = false;
+        if (readyQueue.length === 0 &&
+            unfinishedJobs.length > 0) {
+            prevIdle = true;
+            readyQueue.push(unfinishedJobs[0]);
+            console.log("At time ".concat(unfinishedJobs[0].at, " process ").concat(unfinishedJobs[0].job, " started arr ").concat(unfinishedJobs[0].at, " total ").concat(unfinishedJobs[0].bt, " remain ").concat(unfinishedJobs[0].bt, " wait 0"));
+        }
+        readyQueue.sort(function (a, b) {
+            // Equal-priority processes are scheduled in FCFS order.
+            if (remainingTime[a.job] > remainingTime[b.job])
+                return 1;
+            if (remainingTime[a.job] < remainingTime[b.job])
+                return -1;
+            if (a.job < b.job)
+                return -1;
+            return 1;
+        });
+        var processToExecute = readyQueue[0];
+        var processATLessThanBT = processesInfo.filter(function (p) {
+            var curr = currentTime;
+            if (prevIdle) {
+                curr = processToExecute.at;
+            }
+            return (p.at <= remainingTime[processToExecute.job] + curr &&
+                p !== processToExecute &&
+                !readyQueue.includes(p) &&
+                unfinishedJobs.includes(p));
+        });
+        var gotInterruption = false;
+        processATLessThanBT.some(function (p) {
+            if (prevIdle) {
+                currentTime = processToExecute.at;
+            }
+            var amount = p.at - currentTime;
+            if (currentTime >= p.at) {
+                readyQueue.push(p);
+            }
+            //? what is this   ans stopped
+            if (p.bt < remainingTime[processToExecute.job] - amount) {
+                remainingTime[processToExecute.job] -= amount;
+                readyQueue.push(p);
+                var prevCurrentTime = currentTime;
+                currentTime += amount;
+                //console.log(`At time ${currentTime} process ${processToExecute.job} stopped arr ${processToExecute.at} total ${processToExecute.bt} remain 0 wait ${currentTime - processToExecute.at - processToExecute.bt}`);
+                // ganttChartInfo.push({
+                //   job: processToExecute.job,
+                //   start: prevCurrentTime,
+                //   stop: currentTime
+                // });
+                gotInterruption = true;
+                return true;
+            }
+        });
+        var processToArrive = processesInfo.filter(function (p) {
+            return (p.at <= currentTime &&
+                p !== processToExecute &&
+                !readyQueue.includes(p) &&
+                unfinishedJobs.includes(p));
+        });
+        // Push new processes to readyQueue
+        readyQueue.push.apply(readyQueue, processToArrive);
+        if (!gotInterruption) {
+            if (prevIdle) {
+                var remainingT = remainingTime[processToExecute.job];
+                remainingTime[processToExecute.job] -= remainingT;
+                currentTime = processToExecute.at + remainingT;
+                processATLessThanBT.forEach(function (p) {
+                    if (currentTime >= p.at) {
+                        readyQueue.push(p);
+                    }
+                });
+                //console.log(`At time ${processToExecute.at} process ${processToExecute.job} resumed arr ${processToExecute.at} total ${processToExecute.bt} remain ${processToExecute.bt} wait 0`);
+                // ganttChartInfo.push({
+                //   job: processToExecute.job,
+                //   start: processToExecute.at,
+                //   stop: currentTime
+                // });
+            }
+            else {
+                var remainingT = remainingTime[processToExecute.job];
+                remainingTime[processToExecute.job] -= remainingT;
+                var prevCurrentTime = currentTime;
+                currentTime += remainingT;
+                processATLessThanBT.forEach(function (p) {
+                    if (currentTime >= p.at && !readyQueue.includes(p)) {
+                        readyQueue.push(p);
+                    }
+                });
+                //console.log(`At time ${prevCurrentTime} process ${processToExecute.job} started arr ${processToExecute.at} total ${processToExecute.bt} remain ${processToExecute.bt} wait ${prevCurrentTime - processToExecute.at}`); 
+                // ganttChartInfo.push({
+                //   job: processToExecute.job,
+                //   start: prevCurrentTime,
+                //   stop: currentTime
+                // });
+            }
+        }
+        // Requeueing (move head/first item to tail/last)
+        readyQueue.push(readyQueue.shift());
+        // When the process finished executing
+        if (remainingTime[processToExecute.job] === 0) {
+            var indexToRemoveUJ = unfinishedJobs.indexOf(processToExecute);
+            if (indexToRemoveUJ > -1) {
+                unfinishedJobs.splice(indexToRemoveUJ, 1);
+            }
+            var indexToRemoveRQ = readyQueue.indexOf(processToExecute);
+            if (indexToRemoveRQ > -1) {
+                readyQueue.splice(indexToRemoveRQ, 1);
+            }
+            solvedProcessesInfo.push(__assign(__assign({}, processToExecute), { ft: currentTime, tat: currentTime - processToExecute.at, wat: currentTime - processToExecute.at - processToExecute.bt }));
+            console.log("At time ".concat(currentTime, " process ").concat(processToExecute.job, " finished arr ").concat(processToExecute.at, " total ").concat(processToExecute.bt, " remain 0 wait ").concat(currentTime - processToExecute.at - processToExecute.bt, " TA ").concat(currentTime - processToExecute.at, " WTA ").concat(safeDiv((currentTime - processToExecute.at), (processToExecute.bt))));
+        }
+    };
+    while (Object.values(remainingTime).reduce(function (acc, cur) {
+        return acc + cur;
+    }, 0) &&
+        unfinishedJobs.length > 0) {
+        _loop_3();
+    }
+    // Sort the processes by job name within arrival time
+    solvedProcessesInfo.sort(function (obj1, obj2) {
+        if (obj1.at > obj2.at)
+            return 1;
+        if (obj1.at < obj2.at)
+            return -1;
+        if (obj1.job > obj2.job)
+            return 1;
+        if (obj1.job < obj2.job)
+            return -1;
+        return 0;
+    });
+    return solvedProcessesInfo;
+}
+;
 var fs_1 = require("fs");
 function isBlank(str) {
     return (!str || /^\s*$/.test(str));
@@ -281,4 +447,9 @@ for (var _i = 0, lines_1 = lines; _i < lines_1.length; _i++) {
     priority.push(Number(split[3]));
 }
 console.log("#At time x process y state arr w total z remain y wait k");
-npp(processId, arrivalTime, burstTime, priority);
+if (args[2] === "1")
+    npp(processId, arrivalTime, burstTime, priority);
+if (args[2] === "2")
+    srtf(processId, arrivalTime, burstTime);
+if (args[2] === "3")
+    rr(processId, arrivalTime, burstTime, Number(args[3]));

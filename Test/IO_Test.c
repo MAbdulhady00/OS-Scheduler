@@ -96,7 +96,6 @@ int menu(int *position)
 }
 void logProcess(FILE *logFile, process *p, int clk)
 {
-    int remaintime=5;
     fprintf(logFile, "At time %d process %d ", clk, p->pid);
     switch (p->state)
     {

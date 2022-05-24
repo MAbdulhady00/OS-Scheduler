@@ -40,7 +40,7 @@ void logProcess(FILE *logFile, process *p, int clk)
         fprintf(logFile, "stopped arr %d total %d remain %d wait %d\n", p->arrivalTime, p->runningTime, *p->remainingTime, p->waitTime);
         break;
     case FINISHED:
-        fprintf(logFile, "finished arr %d total %d remain %d wait %d TA %d WTA %.2f\n", p->arrivalTime, p->runningTime, *p->remainingTime, p->waitTime, p->finishTime - p->arrivalTime, ((float)p->finishTime - p->arrivalTime) / p->runningTime);
+        fprintf(logFile, "finished arr %d total %d remain %d wait %d TA %d WTA %.2lf\n", p->arrivalTime, p->runningTime, *p->remainingTime, p->waitTime, p->finishTime - p->arrivalTime, ((double)p->finishTime - (double)p->arrivalTime) / p->runningTime);
         break;
     default:
         break;

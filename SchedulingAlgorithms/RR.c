@@ -74,7 +74,7 @@ void RRNewProcessFinalizationHandler(void *ReadyQueue)
 {
     // printf("Starting A Process\n");
 
-    if (CurrentProcess != NULL)
+    if (CurrentProcess != NULL || isCircularQueueEmpty((CircularQueue*) ReadyQueue))
     {
         return;
     }
@@ -85,6 +85,7 @@ void RRNewProcessFinalizationHandler(void *ReadyQueue)
         kill(p->pWaitId, SIGCONT);
         p->state = RESUMED;
         printf("Process %d Resumed! remain time %d\n", p->pid, *p->remainingTime);
+        p->waitTime = time_after - p->arrivalTime - p->runningTime + *p->remainingTime;
         logProcess(logFile, p, time_after);
         CurrentProcess = p;
     }
@@ -94,6 +95,7 @@ void RRNewProcessFinalizationHandler(void *ReadyQueue)
         p->state = STARTED;
         p->waitTime = p->waitTime == 0 ? time_after - p->arrivalTime : p->waitTime;
         CurrentProcess = p;
+        p->waitTime = time_after - p->arrivalTime - p->runningTime + *p->remainingTime;
         logProcess(logFile, p, time_after);
     }
 
@@ -178,6 +180,7 @@ void RRTimeSlotHandler(void *ReadyQueue)
         SwitchProcess(ReadyQueue);
         return;
     }
+
     curr_quantum++;
     if (curr_quantum == quantum_size)
     {
@@ -191,6 +194,7 @@ void RRTerminationHandler(void *ReadyQueue)
     printf("Process %d terminated!\n", CurrentProcess->pid);
     CurrentProcess->state = FINISHED;
     CurrentProcess->finishTime = time_after;
+    CurrentProcess->waitTime = time_after - CurrentProcess->arrivalTime - CurrentProcess->runningTime + *CurrentProcess->remainingTime;
     logProcess(logFile, CurrentProcess, time_after);
     shmctl(CurrentProcess->shmid_process, IPC_RMID, (struct shmid_ds *)0);
     CurrentProcess = NULL;

@@ -14,6 +14,7 @@ PriorityQueue *CreatePriorirtyQueue(bool (*cmp)(element_t, element_t))
     PriorityQueue *pq = malloc(sizeof(PriorityQueue));
     pq->cmp = cmp;
     pq->arr = CreateDynamicArray(PRIORITY_QUEUE_DEFAULT_CAPACITY);
+    pq->fifo = 0;
     return pq;
 }
 

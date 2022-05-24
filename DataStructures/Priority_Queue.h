@@ -7,6 +7,7 @@ typedef struct
 {
     DynamicArray *arr;
     bool (*cmp)(element_t, element_t);
+    int fifo;
 } PriorityQueue;
 
 PriorityQueue *CreatePriorirtyQueue(bool (*cmp)(element_t, element_t));

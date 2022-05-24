@@ -20,6 +20,7 @@ typedef struct
     int finishTime;     // kamal update -> to calcualte TA Time & WTA
     enum pState state;  // kamal update 
     int pWaitId;
+    int arrivalId;
 } process;
 
 void create_process(process * forked_process);

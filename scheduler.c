@@ -52,19 +52,19 @@ int main(int argc, char *argv[])
 {
     signal(SIGINT, clearResources);
     signal(SIGURG, GenerationFinalize);
-    //signal(SIGUSR2, NewProcessFinalize);
-    //signal(SIGALRM, ProcessTermination);
+    // signal(SIGUSR2, NewProcessFinalize);
+    // signal(SIGALRM, ProcessTermination);
 
     // Make SIGUSR1 block SIGUSR2 & SIGCHLD
-    //struct sigaction setup_action;
-    //sigset_t block_mask;
-    //sigemptyset(&block_mask);
-    //sigaddset(&block_mask, SIGUSR2);
-    //sigaddset(&block_mask, SIGCHLD);
-    //setup_action.sa_handler = NewProcess;
-    //setup_action.sa_mask = block_mask;
-    //setup_action.sa_flags = 0;
-    //sigaction(SIGUSR1, &setup_action, NULL);
+    // struct sigaction setup_action;
+    // sigset_t block_mask;
+    // sigemptyset(&block_mask);
+    // sigaddset(&block_mask, SIGUSR2);
+    // sigaddset(&block_mask, SIGCHLD);
+    // setup_action.sa_handler = NewProcess;
+    // setup_action.sa_mask = block_mask;
+    // setup_action.sa_flags = 0;
+    // sigaction(SIGUSR1, &setup_action, NULL);
 
     // struct sigaction setup_action2;
     // sigset_t block_mask2;
@@ -88,9 +88,9 @@ int main(int argc, char *argv[])
 
     initClk();
     msgid = atoi(argv[1]);
-    if(argc > 3)
+    if (argc > 3)
     {
-        quantum  = atoi(argv[3]);
+        quantum = atoi(argv[3]);
         printf("Scheduler's msgid: %d, Algorithm: %s, Quantum: %d\n", msgid, argv[2], quantum);
     }
     else
@@ -101,46 +101,51 @@ int main(int argc, char *argv[])
     printf("Initialized!\n");
     int time_before = -1;
     while (GenerationRunning || CurrentProcess != NULL)
-    {   
+    {
+        bool please = false;
         time_before = getClk();
         time_after = getClk();
-        while(GenerationRunning) {
+        while (GenerationRunning)
+        {
             printf("Attempting to recieve msg \n");
             msgrcv(msgid, &msg, sizeof(msg.p), 0, 0);
             printf("recieved type: %ld\n", msg.mtype);
-            if(msg.mtype <= 1)
+            if (msg.mtype <= 1)
                 break;
-            
+
             process *p = malloc(sizeof(process));
-            
+
             memcpy(p, &(msg.p), sizeof(process));
             p->remainingTime = malloc(sizeof(int));
             *p->remainingTime = p->runningTime;
-            
-            
+
             push_back(ProcessTable, p);
             SchedulingNewProcessHandler(ReadyQueue, p);
         }
-        
+
         SchedulingNewProcessFinalizationHandler(ReadyQueue);
-        while(CurrentProcess != NULL && *CurrentProcess->remainingTime <= 0) {
+        while (CurrentProcess != NULL && *CurrentProcess->remainingTime <= 0)
+        {
             waitpid(CurrentProcess->pWaitId, NULL, 0);
             SchedulingTerminationHandler(ReadyQueue);
             SchedulingNewProcessFinalizationHandler(ReadyQueue);
+            please = true;
         }
         
+        if (!please && SchedulingTimeSlotHandler != NULL)
+        {
+            SchedulingTimeSlotHandler(ReadyQueue);
+        }
+
 
         while (time_after <= time_before)
         {
             time_after = getClk();
         }
 
+        
         time_before = getClk();
         printf("CLK: %d\n", time_after);
-        if (SchedulingTimeSlotHandler != NULL)
-        {
-            SchedulingTimeSlotHandler(ReadyQueue);
-        }
     }
 
     SchedulingDestroy(ReadyQueue);
@@ -152,16 +157,16 @@ int main(int argc, char *argv[])
 
 void NewProcess(int signum)
 {
-    return; //lol
+    return; // lol
 }
 
 void NewProcessFinalize(int signum)
 {
-    //time_after = getClk();
-    //SchedulingNewProcessFinalizationHandler(ReadyQueue);  
+    // time_after = getClk();
+    // SchedulingNewProcessFinalizationHandler(ReadyQueue);
 }
 
-void GenerationFinalize(int signum) 
+void GenerationFinalize(int signum)
 {
     GenerationRunning = false;
 }
@@ -171,7 +176,7 @@ void ProcessTermination(int signum)
     time_after = getClk();
     waitpid(CurrentProcess->pWaitId, NULL, 0);
     SchedulingTerminationHandler(ReadyQueue);
-    if(!recievedFromGenerator)
+    if (!recievedFromGenerator)
         SchedulingNewProcessFinalizationHandler(ReadyQueue);
 }
 
@@ -223,9 +228,9 @@ void clearResources(int signum)
 {
     printf("Clearing scheduler resources...\n");
     freeOut(logFile, perfFile);
-    for(int i=0;i<ProcessTable->size;i++)
+    for (int i = 0; i < ProcessTable->size; i++)
     {
-        process* p = ProcessTable->data[i];
+        process *p = ProcessTable->data[i];
         shmctl(p->shmid_process, IPC_RMID, (struct shmid_ds *)0);
     }
 }
