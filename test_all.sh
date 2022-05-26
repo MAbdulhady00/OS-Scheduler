@@ -1,6 +1,6 @@
-for i in {2..2}
+for i in {1..100}
 do
-./test_generator.out $(((RANDOM % 5)+1))
+./test_generator.out $(((RANDOM % 100)+1))
 # ./process_generator.out 1 > /dev/null
 # node TestScheduling.js 1 > out.log
 # FILE1="out.log"
@@ -15,10 +15,12 @@ do
 # ./process_generator.out 2 > /dev/null
 # node TestScheduling.js 2 > out.log
 # python3 testValidation.py "SRTN test successful!"
+
+#Test Round Robin
 quantum=$(((RANDOM % 8)+1))
 echo testing with quantum: $quantum
 ./process_generator.out 3 $quantum > /dev/null
-node TestScheduling.js 3 $quantum > out.log
-python3 testValidation.py "RR test successful!"
+./rrTest.out $quantum
+python3 testValidation.py "RR test $i successful!"
 done
 
