@@ -16,7 +16,7 @@
 #define EXTERN extern
 #endif
 EXTERN process *CurrentProcess = NULL;
-EXTERN int time_after = 0;
+EXTERN int time = 0;
 EXTERN FILE *logFile, *perfFile;
 DynamicArray *ProcessTable; // Might need to change to hashtable
 
@@ -99,10 +99,9 @@ int main(int argc, char *argv[])
     }
     initialize(atoi(argv[2]));
     printf("Initialized!\n");
-    int time_before = -1;
+    int time_before, time_after;
     while (GenerationRunning || CurrentProcess != NULL)
     {
-        bool please = false;
         time_before = getClk();
         time_after = getClk();
         while (GenerationRunning)
@@ -123,29 +122,33 @@ int main(int argc, char *argv[])
             SchedulingNewProcessHandler(ReadyQueue, p);
         }
 
+        if (SchedulingTimeSlotHandler != NULL)
+        {
+            SchedulingTimeSlotHandler(ReadyQueue);
+        }
+        
         SchedulingNewProcessFinalizationHandler(ReadyQueue);
         while (CurrentProcess != NULL && *CurrentProcess->remainingTime <= 0)
         {
             waitpid(CurrentProcess->pWaitId, NULL, 0);
             SchedulingTerminationHandler(ReadyQueue);
             SchedulingNewProcessFinalizationHandler(ReadyQueue);
-            please = true;
         }
         
-        if (!please && SchedulingTimeSlotHandler != NULL)
-        {
-            SchedulingTimeSlotHandler(ReadyQueue);
-        }
+        
 
 
         while (time_after <= time_before)
         {
             time_after = getClk();
         }
+        ++time;
 
+        if(CurrentProcess != NULL)
+            --*CurrentProcess->remainingTime;
         
         time_before = getClk();
-        printf("CLK: %d\n", time_after);
+        printf("CLK: %d\n", time);
     }
 
     SchedulingDestroy(ReadyQueue);
@@ -173,7 +176,6 @@ void GenerationFinalize(int signum)
 
 void ProcessTermination(int signum)
 {
-    time_after = getClk();
     waitpid(CurrentProcess->pWaitId, NULL, 0);
     SchedulingTerminationHandler(ReadyQueue);
     if (!recievedFromGenerator)

@@ -13,7 +13,7 @@
 #define EXTERN extern
 #endif
 EXTERN process *CurrentProcess;
-EXTERN int time_after;
+EXTERN int time;
 EXTERN FILE *logFile;
 
 int quantum_size;
@@ -85,18 +85,18 @@ void RRNewProcessFinalizationHandler(void *ReadyQueue)
         kill(p->pWaitId, SIGCONT);
         p->state = RESUMED;
         printf("Process %d Resumed! remain time %d\n", p->pid, *p->remainingTime);
-        p->waitTime = time_after - p->arrivalTime - p->runningTime + *p->remainingTime;
-        logProcess(logFile, p, time_after);
+        p->waitTime = time - p->arrivalTime - p->runningTime + *p->remainingTime;
+        logProcess(logFile, p, time);
         CurrentProcess = p;
     }
     else
     {
         create_process(p);
         p->state = STARTED;
-        p->waitTime = p->waitTime == 0 ? time_after - p->arrivalTime : p->waitTime;
+        p->waitTime = p->waitTime == 0 ? time - p->arrivalTime : p->waitTime;
         CurrentProcess = p;
-        p->waitTime = time_after - p->arrivalTime - p->runningTime + *p->remainingTime;
-        logProcess(logFile, p, time_after);
+        p->waitTime = time - p->arrivalTime - p->runningTime + *p->remainingTime;
+        logProcess(logFile, p, time);
     }
 
     // printf("Started A Process\n");
@@ -137,7 +137,7 @@ void SwitchProcess(void *ReadyQueue)
             // Stop Current Process
             kill((pid_t)CurrentProcess->pWaitId, SIGSTOP);
             CurrentProcess->state = STOPPED;
-            logProcess(logFile, CurrentProcess, time_after);
+            logProcess(logFile, CurrentProcess, time);
             printf("Process %d Stopped!remain time %d\n", CurrentProcess->pid, *CurrentProcess->remainingTime);
         }
 
@@ -153,16 +153,16 @@ void SwitchProcess(void *ReadyQueue)
             kill(p->pWaitId, SIGCONT);
             p->state = RESUMED;
             printf("Process %d Resumed! remain time %d\n", p->pid, *p->remainingTime);
-            logProcess(logFile, p, time_after);
+            logProcess(logFile, p, time);
             CurrentProcess = p;
         }
         else
         {
             create_process(p);
             p->state = STARTED;
-            p->waitTime = p->waitTime == 0 ? time_after - p->arrivalTime : p->waitTime;
+            p->waitTime = p->waitTime == 0 ? time - p->arrivalTime : p->waitTime;
             CurrentProcess = p;
-            logProcess(logFile, p, time_after);
+            logProcess(logFile, p, time);
         }
     }
     else
@@ -193,9 +193,9 @@ void RRTerminationHandler(void *ReadyQueue)
 {
     printf("Process %d terminated!\n", CurrentProcess->pid);
     CurrentProcess->state = FINISHED;
-    CurrentProcess->finishTime = time_after;
-    CurrentProcess->waitTime = time_after - CurrentProcess->arrivalTime - CurrentProcess->runningTime + *CurrentProcess->remainingTime;
-    logProcess(logFile, CurrentProcess, time_after);
+    CurrentProcess->finishTime = time;
+    CurrentProcess->waitTime = time - CurrentProcess->arrivalTime - CurrentProcess->runningTime + *CurrentProcess->remainingTime;
+    logProcess(logFile, CurrentProcess, time);
     shmctl(CurrentProcess->shmid_process, IPC_RMID, (struct shmid_ds *)0);
     CurrentProcess = NULL;
     curr_quantum = 0;

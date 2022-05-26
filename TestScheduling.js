@@ -205,7 +205,9 @@ function npp(processId, arrivalTime, burstTime, priorities) {
                     return 1;
                 if (a.at < b.at)
                     return -1;
-                return 0;
+                if (a.job < b.job)
+                    return -1;
+                return 1;
             });
             var processToExecute = rqSortedByPriority[0];
             var previousFinishTime = finishTime[finishTime.length - 1];

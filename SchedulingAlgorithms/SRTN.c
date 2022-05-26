@@ -15,7 +15,7 @@
 #endif
 EXTERN process* CurrentProcess;
 EXTERN FILE *logFile;
-EXTERN int time_after;
+EXTERN int time;
 
 static bool compare_remain_time(process *p1, process *p2)
 {
@@ -88,7 +88,7 @@ process *SRTNRunNext(void *ReadyQueue)
         p->state = RESUMED;
         printf("Process %d Resumed!\n", p ->pid);
         //p->waitTime = time_after - p->arrivalTime;
-        logProcess(logFile, p, time_after);
+        logProcess(logFile, p, time);
     }
     else
     {
@@ -96,8 +96,8 @@ process *SRTNRunNext(void *ReadyQueue)
         kill(p->pWaitId,SIGCONT);
         p->state = STARTED;
         printf("Process %d Started!\n", p ->pid);
-        p->waitTime = time_after - p->arrivalTime;
-        logProcess(logFile, p, time_after);
+        p->waitTime = time - p->arrivalTime;
+        logProcess(logFile, p, time);
     }
     CurrentProcess = p;
     PriorityQueuePop((PriorityQueue *)ReadyQueue);
@@ -119,17 +119,17 @@ void SRTNNewProcessFinalizationHandler(void *ReadyQueue)
                 kill(p->pWaitId,SIGCONT);
                 p->state = RESUMED;
                 printf("Process %d Resumed! remain time %d\n", p ->pid ,*p->remainingTime);
-                p->waitTime = time_after - p->arrivalTime - p->runningTime + *p->remainingTime;
-                logProcess(logFile, p, time_after);
+                p->waitTime = time - p->arrivalTime - p->runningTime + *p->remainingTime;
+                logProcess(logFile, p, time);
             }
             else
             {
                 create_process(p);
                 //kill(p->pWaitId,SIGCONT);
                 p->state = STARTED;
-                p->waitTime = time_after - p->arrivalTime - p->runningTime + *p->remainingTime;
+                p->waitTime = time - p->arrivalTime - p->runningTime + *p->remainingTime;
                 printf("Process %d Started! remain time %d \n", p ->pid,*p->remainingTime);
-                logProcess(logFile, p, time_after);
+                logProcess(logFile, p, time);
             }
             CurrentProcess = p;
     }
@@ -142,17 +142,17 @@ void SRTNNewProcessFinalizationHandler(void *ReadyQueue)
                 p->state = RESUMED;
                 //p->waitTime = time_after - p->arrivalTime;
                 printf("Process %d Resumed! remain time %d\n", p ->pid ,*p->remainingTime);
-                p->waitTime = time_after - p->arrivalTime - p->runningTime + *p->remainingTime;
-                logProcess(logFile, p, time_after);
+                p->waitTime = time - p->arrivalTime - p->runningTime + *p->remainingTime;
+                logProcess(logFile, p, time);
             }
             else
             {
                 create_process(p);
                 //kill(p->pWaitId,SIGCONT);
                 p->state = STARTED;
-                p->waitTime = time_after - p->arrivalTime - p->runningTime + *p->remainingTime;
+                p->waitTime = time - p->arrivalTime - p->runningTime + *p->remainingTime;
                 printf("Process %d Started! remain time %d \n", p ->pid,*p->remainingTime);
-                logProcess(logFile, p, time_after);
+                logProcess(logFile, p, time);
             }
             
         CurrentProcess->state = STOPPED;
@@ -160,7 +160,7 @@ void SRTNNewProcessFinalizationHandler(void *ReadyQueue)
         kill((pid_t)CurrentProcess->pWaitId, SIGSTOP);
         //CurrentProcess->state = STOPPED;
         printf("Process %d Stopped!remain time %d\n", CurrentProcess->pid,*CurrentProcess->remainingTime);
-        logProcess(logFile, CurrentProcess, time_after);
+        logProcess(logFile, CurrentProcess, time);
         CurrentProcess = p;
     } 
     
@@ -171,8 +171,8 @@ void SRTNTerminationHandler(void *ReadyQueue)
     int statloc =0;
     printf("Process %d terminated!\n", CurrentProcess->pid);
     CurrentProcess->state = FINISHED;
-    CurrentProcess->finishTime = time_after;
-    logProcess(logFile, CurrentProcess, time_after);
+    CurrentProcess->finishTime = time;
+    logProcess(logFile, CurrentProcess, time);
     shmctl(CurrentProcess->shmid_process, IPC_RMID, (struct shmid_ds *)0);
     //waitpid(CurrentProcess->pWaitId,&statloc);
     CurrentProcess = NULL;

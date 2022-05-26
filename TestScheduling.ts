@@ -203,7 +203,9 @@ function npp(processId: number[], arrivalTime: number[], burstTime: number[], pr
         if (a.priority < b.priority) return -1;
         if (a.at > b.at) return 1;
         if (a.at < b.at) return -1;
-        return 0;
+        if (a.job < b.job)
+          return -1;
+        return 1;
       });
 
       const processToExecute = rqSortedByPriority[0];

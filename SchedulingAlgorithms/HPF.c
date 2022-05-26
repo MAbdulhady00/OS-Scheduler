@@ -13,7 +13,7 @@
 #endif
 EXTERN process *CurrentProcess;
 EXTERN FILE *logFile;
-EXTERN int time_after;
+EXTERN int time;
 
 static bool cmp(process *p1, process *p2)
 {
@@ -43,9 +43,9 @@ void HPFNewProcessFinalizationHandler(void *ReadyQueue)
     process *p = PriorityQueueGetMin((PriorityQueue *)ReadyQueue);
     PriorityQueuePop((PriorityQueue *)ReadyQueue);
     create_process(p);
-    p->waitTime = time_after - p->arrivalTime;
+    p->waitTime = time - p->arrivalTime;
     CurrentProcess = p;
-    logProcess(logFile, p, time_after);
+    logProcess(logFile, p, time);
 }
 void HPFEnqueue(void *ReadyQueue, process *p)
 {
@@ -66,8 +66,8 @@ void HPFTerminationHandler(void *ReadyQueue)
 {
     printf("Process %d terminated!\n", CurrentProcess->pid);
     CurrentProcess->state = FINISHED;
-    CurrentProcess->finishTime = time_after;
-    logProcess(logFile, CurrentProcess, time_after);
+    CurrentProcess->finishTime = time;
+    logProcess(logFile, CurrentProcess, time);
     shmdt(CurrentProcess->remainingTime);
     shmctl(CurrentProcess->shmid_process, IPC_RMID, (struct shmid_ds *)0);
     CurrentProcess = NULL;

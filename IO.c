@@ -28,6 +28,8 @@ void freeOut(FILE *logFile, FILE *perfFile)
 void logProcess(FILE *logFile, process *p, int clk)
 {
     fprintf(logFile, "At time %d process %d ", clk, p->pid);
+    double WTA =  ((double)p->finishTime - (double)p->arrivalTime) / p->runningTime;
+    WTA = (int)(WTA * 100 + .5) / 100.0;
     switch (p->state)
     {
     case STARTED:
@@ -40,7 +42,7 @@ void logProcess(FILE *logFile, process *p, int clk)
         fprintf(logFile, "stopped arr %d total %d remain %d wait %d\n", p->arrivalTime, p->runningTime, *p->remainingTime, p->waitTime);
         break;
     case FINISHED:
-        fprintf(logFile, "finished arr %d total %d remain %d wait %d TA %d WTA %.2lf\n", p->arrivalTime, p->runningTime, *p->remainingTime, p->waitTime, p->finishTime - p->arrivalTime, ((double)p->finishTime - (double)p->arrivalTime) / p->runningTime);
+        fprintf(logFile, "finished arr %d total %d remain %d wait %d TA %d WTA %.2lf\n", p->arrivalTime, p->runningTime, *p->remainingTime, p->waitTime , p->finishTime - p->arrivalTime,WTA);
         break;
     default:
         break;

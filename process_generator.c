@@ -39,15 +39,14 @@ int main(int argc, char *argv[])
     // To get time use this
     // TODO Generation Main Loop
     process *p;
-    int Time, count, time_after = getClk();
+    int time, count, time_after = getClk(), time_before = getClk();
     struct msgBuffer msg;
     while (queue->front)
     {
-        Time = getClk();
         // 5. Create a data structure for processes and provide it with its parameters.
         p = queue->front->val;
         count = 0;
-        while (p->arrivalTime <= Time)
+        while (p->arrivalTime <= time)
         {
             // Count the amount of processe in current time
             dequeueLinkedQueue(queue);
@@ -63,7 +62,7 @@ int main(int argc, char *argv[])
             p = bufferQueue->front->val;
             msg.p = *p;
             msg.mtype = count + 1;
-            printf("PID: %d, Msg sent I will block now at Time %d\n", msg.p.pid, Time);
+            printf("PID: %d, Msg sent I will block now at Time %d\n", msg.p.pid, time);
             msgsnd(msgid, &msg, sizeof(msg.p), 0);
             printf("msg send!\n");
             --count;
@@ -74,10 +73,13 @@ int main(int argc, char *argv[])
         msgsnd(msgid, &msg, sizeof(msg.p), 0);
 
         // Sleep for next clk cycle
-        while (time_after <= Time)
+        while (time_after <= time_before)
         {
             time_after = getClk();
         }
+        time_before = getClk();
+
+        ++time;
     }
 
     kill(schedulerPId, SIGURG);
