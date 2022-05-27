@@ -31,4 +31,6 @@ test:
 testIO:
 	gcc ./Test/IO_Test.c ./DataStructures/LinkedQueue.c -o IO_Test.out
 	./IO_Test.out
-
+testmem:
+	gcc ./Memory/Memory_Manager.c ./Memory/test_memory_DS.c ./Memory/SortedLinkedList.c -o DS.out -lm
+	./DS.out
