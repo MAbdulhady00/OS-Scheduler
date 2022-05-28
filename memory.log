@@ -1,0 +1,14 @@
+at time 2 allocated 255 bytes for process 1 from 0 to 255 
+at time 6 allocated 254 bytes for process 2 from 256 to 511 
+at time 7 allocated 253 bytes for process 3 from 512 to 767 
+at time 9 allocated 252 bytes for process 4 from 768 to 1023 
+at time 10 deallocated 255 bytes for process 1 from 0 to 255 
+at time 10 allocated 249 bytes for process 7 from 0 to 255 
+at time 15 deallocated 253 bytes for process 3 from 512 to 767 
+at time 15 allocated 250 bytes for process 6 from 512 to 767 
+at time 22 deallocated 254 bytes for process 2 from 256 to 511 
+at time 22 allocated 251 bytes for process 5 from 256 to 511 
+at time 30 deallocated 249 bytes for process 7 from 0 to 255 
+at time 39 deallocated 252 bytes for process 4 from 768 to 1023 
+at time 52 deallocated 250 bytes for process 6 from 512 to 767 
+at time 77 deallocated 251 bytes for process 5 from 256 to 511 

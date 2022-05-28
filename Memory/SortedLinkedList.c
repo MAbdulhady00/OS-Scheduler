@@ -7,7 +7,7 @@ SortedLinkedList *CreateSortedLinkedList()
     Q->head = NULL;
     return Q;
 }
-Sorted_Node *newNode(int start_pos)
+Sorted_Node *newSortedNode(int start_pos)
 {
     Sorted_Node *temp = malloc(sizeof(Sorted_Node));
     temp->start_position = start_pos;
@@ -25,7 +25,7 @@ void print(SortedLinkedList* Memory_List )
 }
 void insert_sorted(SortedLinkedList* Memory_List ,int start_pos)
 {
-    Sorted_Node *tmp = newNode(start_pos);
+    Sorted_Node *tmp = newSortedNode(start_pos);
     if (!Memory_List->head)
     {   
         Memory_List->head = tmp;
@@ -57,10 +57,16 @@ void insert_sorted(SortedLinkedList* Memory_List ,int start_pos)
      iterator_previous->Node_PTR_Next = tmp;   
     }
 }
-// int search(int searched_position)
-// {
-    
-// }
+
+int peekFront(SortedLinkedList* Memory_List ) {
+    int start_pos = -1;
+    if(Memory_List->head != NULL) {
+        start_pos = Memory_List->head->start_position;
+    }
+
+    return start_pos;
+}
+
 int get_first_position (SortedLinkedList* Memory_List )
 {
     int start_pos = -1;

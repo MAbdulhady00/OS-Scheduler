@@ -1,6 +1,6 @@
 #include "Memory_Manager.h"
 
-const int NO_LinkedLists =8;
+const int NO_LinkedLists = 8;
 void MEM_init()
 {
     
@@ -10,6 +10,7 @@ void MEM_init()
         MEM[i] = CreateSortedLinkedList();
     }
     insert_sorted(MEM[NO_LinkedLists - 1], 0);
+    max_available = NO_LinkedLists - 1;
 }
 int get_index(int size)
 {
@@ -56,6 +57,7 @@ int getsize(int index)
 //         return address_index2;
 //     }
 // }
+
 int split(int index)
 {
     int first = get_first_position(MEM[index]);
@@ -70,6 +72,12 @@ int split(int index)
             return -1;
     }
     insert_sorted(MEM[index-1], first + getsize(index - 1));
+    
+    // if(index == max_available && peekFront(MEM[index]) == -1) {
+    //         --max_available;
+    //         printf("max avail changed: %d\n", max_available);
+    // }
+
     return first;
 }
 
@@ -84,10 +92,17 @@ int allocate_MEM(int process_size)
     }
     return address;
 }
-// int merge()
-// {
-    
-// }
+
+void setmaxavailable() {
+    max_available = -1;
+    for(int i = NO_LinkedLists - 1; i >= 0; --i) {
+        if(peekFront(MEM[i]) != -1) {
+            max_available = i;
+            return;
+        }
+    }
+}
+
 void deallocate_MEM(int start_pos,int process_size)
 {
     int memsize = round_mem_size(process_size);
@@ -102,6 +117,8 @@ void deallocate_MEM(int start_pos,int process_size)
             if(result == 0)
             {
                 insert_sorted(MEM[index],start_pos);
+                if(index > max_available)
+                    max_available = index;
                 break;
             }
             index += 1;
@@ -114,15 +131,19 @@ void deallocate_MEM(int start_pos,int process_size)
             if(result == 0)
             {
                 insert_sorted(MEM[index],start_pos);
+                if(index > max_available)
+                    max_available = index;
                 break;
             }
             start_pos = start_pos-memsize;
             index += 1;
             memsize*=2; 
         }
+
     }
     
 }
+
 void print_freemem ()
 {
     printf("Free Memory Start\n");

@@ -16,9 +16,10 @@ typedef struct
 
 SortedLinkedList *CreateSortedLinkedList();
 
-Sorted_Node *newNode(int start_pos);
+Sorted_Node *newSortedNode(int start_pos);
 
 void insert_sorted(SortedLinkedList* Memory_List ,int start_pos);
+int peekFront(SortedLinkedList* Memory_List );
 int get_first_position (SortedLinkedList* Memory_List );
 int delete(SortedLinkedList* Memory_List ,int start_pos);
 void print(SortedLinkedList* Memory_List );

@@ -17,19 +17,20 @@ EXTERN process* CurrentProcess;
 EXTERN FILE *logFile;
 EXTERN int time;
 
-static bool compare_remain_time(process *p1, process *p2)
+bool SRTNCmp(process *p1, process *p2)
 {
-    if (*p1->remainingTime < *p2->remainingTime)
+    if (p1->remainingTime < p2->remainingTime)
         return true;
 
-    if (*p1->remainingTime == *p2->remainingTime)
+    if (p1->remainingTime == p2->remainingTime)
         return p1->arrivalId < p2->arrivalId;
 
     return false;
 }
+
 void *SRTNInit(void *args)
 {
-    return CreatePriorirtyQueue(compare_remain_time);
+    return CreatePriorirtyQueue(SRTNCmp);
 }
 
 // void SRTNNewProcessHandler(void* ReadyQueue, process* p) {
@@ -118,8 +119,8 @@ void SRTNNewProcessFinalizationHandler(void *ReadyQueue)
             {
                 kill(p->pWaitId,SIGCONT);
                 p->state = RESUMED;
-                printf("Process %d Resumed! remain time %d\n", p ->pid ,*p->remainingTime);
-                p->waitTime = time - p->arrivalTime - p->runningTime + *p->remainingTime;
+                printf("Process %d Resumed! remain time %d\n", p ->pid, p->remainingTime);
+                p->waitTime = time - p->arrivalTime - p->runningTime + p->remainingTime;
                 logProcess(logFile, p, time);
             }
             else
@@ -127,13 +128,13 @@ void SRTNNewProcessFinalizationHandler(void *ReadyQueue)
                 create_process(p);
                 //kill(p->pWaitId,SIGCONT);
                 p->state = STARTED;
-                p->waitTime = time - p->arrivalTime - p->runningTime + *p->remainingTime;
-                printf("Process %d Started! remain time %d \n", p ->pid,*p->remainingTime);
+                p->waitTime = time - p->arrivalTime - p->runningTime + p->remainingTime;
+                printf("Process %d Started! remain time %d \n", p ->pid, p->remainingTime);
                 logProcess(logFile, p, time);
             }
             CurrentProcess = p;
     }
-    else if (*CurrentProcess->remainingTime > *p->remainingTime) { //Check preemption 
+    else if (CurrentProcess->remainingTime > p->remainingTime) { //Check preemption 
         PriorityQueuePop((PriorityQueue*)ReadyQueue);
         PriorityQueuePush((PriorityQueue*)ReadyQueue, CurrentProcess);
         if (p->state == STOPPED)
@@ -141,26 +142,25 @@ void SRTNNewProcessFinalizationHandler(void *ReadyQueue)
                 kill(p->pWaitId,SIGCONT);
                 p->state = RESUMED;
                 //p->waitTime = time_after - p->arrivalTime;
-                printf("Process %d Resumed! remain time %d\n", p ->pid ,*p->remainingTime);
-                p->waitTime = time - p->arrivalTime - p->runningTime + *p->remainingTime;
-                logProcess(logFile, p, time);
+                printf("Process %d Resumed! remain time %d\n", p ->pid, p->remainingTime);
+                p->waitTime = time - p->arrivalTime - p->runningTime + p->remainingTime;
             }
             else
             {
                 create_process(p);
                 //kill(p->pWaitId,SIGCONT);
                 p->state = STARTED;
-                p->waitTime = time - p->arrivalTime - p->runningTime + *p->remainingTime;
-                printf("Process %d Started! remain time %d \n", p ->pid,*p->remainingTime);
-                logProcess(logFile, p, time);
+                p->waitTime = time - p->arrivalTime - p->runningTime + p->remainingTime;
+                printf("Process %d Started! remain time %d \n", p ->pid, p->remainingTime);
             }
             
         CurrentProcess->state = STOPPED;
         //TODO: LOG PROCESS STOPPED
         kill((pid_t)CurrentProcess->pWaitId, SIGSTOP);
         //CurrentProcess->state = STOPPED;
-        printf("Process %d Stopped!remain time %d\n", CurrentProcess->pid,*CurrentProcess->remainingTime);
+        printf("Process %d Stopped! remain time %d\n", CurrentProcess->pid, CurrentProcess->remainingTime);
         logProcess(logFile, CurrentProcess, time);
+        logProcess(logFile, p, time);
         CurrentProcess = p;
     } 
     
@@ -173,7 +173,6 @@ void SRTNTerminationHandler(void *ReadyQueue)
     CurrentProcess->state = FINISHED;
     CurrentProcess->finishTime = time;
     logProcess(logFile, CurrentProcess, time);
-    shmctl(CurrentProcess->shmid_process, IPC_RMID, (struct shmid_ds *)0);
     //waitpid(CurrentProcess->pWaitId,&statloc);
     CurrentProcess = NULL;
     // if (PriorityQueueEmpty((PriorityQueue *)ReadyQueue)) {

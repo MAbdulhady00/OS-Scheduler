@@ -14,11 +14,11 @@ typedef struct
     int priority;
     int arrivalTime;
     int runningTime;
-    int *remainingTime; // sabry update process block
-    int shmid_process;  // sabry update process block
-    int waitTime;       // Kamal update
-    int finishTime;     // kamal update -> to calcualte TA Time & WTA
-    enum pState state;  // kamal update 
+    int remainingTime;
+    int shmid_process;  
+    int waitTime;       
+    int finishTime;     
+    enum pState state;  
     int pWaitId;
     int arrivalId;
     int memsize;

@@ -3,6 +3,8 @@
 
 void *HPFInit(void *args);
 
+bool HPFCmp(process *p1, process *p2);
+
 void HPFNewProcessHandler(void *ReadyQueue, process *p);
 
 void HPFNewProcessFinalizationHandler(void *ReadyQueue);
