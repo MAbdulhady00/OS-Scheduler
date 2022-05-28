@@ -35,3 +35,6 @@ testIO:
 testRR:
 	./rrTest.out 4
 
+testmem:
+	gcc ./Memory/Memory_Manager.c ./Memory/test_memory_DS.c ./Memory/SortedLinkedList.c -o DS.out -lm
+	./DS.out

@@ -21,6 +21,8 @@ typedef struct
     enum pState state;  // kamal update 
     int pWaitId;
     int arrivalId;
+    int memsize;
+    int address_position;
 } process;
 
 void create_process(process * forked_process);

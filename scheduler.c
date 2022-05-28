@@ -4,6 +4,7 @@
 #include "process_data.h"
 #include "IO.h"
 #include "./DataStructures/Dynamic_Array.h"
+#include "./DataStructures/LinkedQueue.h"
 #include "./SchedulingAlgorithms/HPF.h"
 #include "./SchedulingAlgorithms/SRTN.h"
 #include "./SchedulingAlgorithms/RR.h"
@@ -19,7 +20,7 @@ EXTERN process *CurrentProcess = NULL;
 EXTERN int time = 0;
 EXTERN FILE *logFile, *perfFile;
 DynamicArray *ProcessTable; // Might need to change to hashtable
-
+LinkedQueue* Waiting_Queue;
 struct msgBuffer msg;
 int msgid = 0;
 bool recievedFromGenerator = true;
@@ -52,6 +53,7 @@ int main(int argc, char *argv[])
 {
     signal(SIGINT, clearResources);
     signal(SIGURG, GenerationFinalize);
+    Waiting_Queue = CreateLinkedQueue();
     // signal(SIGUSR2, NewProcessFinalize);
     // signal(SIGALRM, ProcessTermination);
 
