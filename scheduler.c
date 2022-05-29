@@ -23,6 +23,8 @@ EXTERN int max_available;
 EXTERN process *CurrentProcess = NULL;
 EXTERN int time = 0;
 EXTERN FILE *logFile, *perfFile, *memlogFile;
+EXTERN double sumWTA = 0, sumWTASq = 0, sumWaiting = 0;
+EXTERN int nProcess = 0, sumIdleTime = 0;;
 DynamicArray *ProcessTable; // Might need to change to hashtable
 //LinkedQueue* Waiting_Queue;
 struct msgBuffer msg;
@@ -134,7 +136,10 @@ int main(int argc, char *argv[])
             
             SchedulingAttemptRunNext(ReadyQueue);
         }
-        
+
+        if(CurrentProcess == NULL)
+            ++sumIdleTime;
+
         while (time_after <= time_before)
         {
             time_after = getClk();
@@ -147,7 +152,7 @@ int main(int argc, char *argv[])
         time_before = getClk();
         printf("CLK: %d\n", time);
     }
-
+    logPerf(perfFile);
     SchedulingDestroy(ReadyQueue);
     // upon termination release the clock resources.
     // With true sent all other processes will die too
