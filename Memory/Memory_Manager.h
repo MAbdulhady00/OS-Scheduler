@@ -3,8 +3,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include"SortedLinkedList.h"
-#define smallest_size 8
-#define MEM_SIZE 1024
+#define smallest_size 8 // smallest memory block for process
+#define MEM_SIZE 1024   // size of memory
 
 #ifdef scheduler_c
 #define EXTERN

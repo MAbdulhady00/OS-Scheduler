@@ -106,6 +106,7 @@ int main(int argc, char *argv[])
     {
         time_before = getClk();
         time_after = getClk();
+        
         while (GenerationRunning)
         {
             printf("Attempting to recieve msg \n");
@@ -142,9 +143,9 @@ int main(int argc, char *argv[])
         {
             //Wait for the process and deallocate
             waitpid(CurrentProcess->pWaitId, NULL, 0);
-            deallocate_MEM(CurrentProcess->address_position, CurrentProcess->memsize);
+            //deallocate_MEM(CurrentProcess->address_position, CurrentProcess->memsize);
             CurrentProcess->state = FINISHED;
-            logMEM(memlogFile, CurrentProcess, time);
+            //logMEM(memlogFile, CurrentProcess, time);
             SchedulingTerminationHandler(ReadyQueue);
 
             //Attempt to enqueue a process from waiting queue to ready queue
@@ -173,7 +174,15 @@ int main(int argc, char *argv[])
 
         //Decrement remaining time
         if(CurrentProcess != NULL)
+        {
             --CurrentProcess->remainingTime;
+            if(CurrentProcess->remainingTime ==0)
+            {
+                deallocate_MEM(CurrentProcess->address_position, CurrentProcess->memsize);
+                //CurrentProcess->state = FINISHED;
+                logMEM(memlogFile, CurrentProcess, time);
+            }
+        }
         
         time_before = getClk();
         printf("CLK: %d\n", time);

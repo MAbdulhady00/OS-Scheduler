@@ -1,6 +1,8 @@
 #include "Memory_Manager.h"
 
 const int NO_LinkedLists = 8;
+
+// initialize memory array of sorted linked lists
 void MEM_init()
 {
     
@@ -12,6 +14,9 @@ void MEM_init()
     insert_sorted(MEM[NO_LinkedLists - 1], 0);
     max_available = NO_LinkedLists - 1;
 }
+
+// get appropraite index in memory from real index of size 
+// for example  8 -> 2^3 -> 3 -> 0
 int get_index(int size)
 {
     int index = log2(size);
@@ -22,6 +27,8 @@ int get_index(int size)
     }
     return index - smallest_index;
 }
+
+// round size to availabe sizes in buddy system {8-16-32-64-128-256}
 int round_mem_size(int process_size)
 {
     int floored_size = floor(log2(process_size));
@@ -32,32 +39,15 @@ int round_mem_size(int process_size)
     }
     return finalsize;
 }
+
+// get appropraite size in memory from index of size 
 int getsize(int index)
 {
     index = index + log2(smallest_size);
     return pow(2,index);
 }
-// int split(SortedLinkedList **MEM, int index, int index2)
-// {
-//     if (index2 >)
-//         int address_index2 = get_first_position(MEM[index2]);
-//     if (address_index2 == -1)
-//     {
-//         int address = split(MEM, index, index2++);
-//         if (index == index2 - 1)
-//         {
-//         }
-//         else
-//         {
-//         }
-//     }
-//     else
-//     {
-//         insert_sorted(MEM[index2 - 1], address_index2 + pow(2, index2 - 1));
-//         return address_index2;
-//     }
-// }
 
+// recursive function to go to largest available memory size then split it recursively 
 int split(int index)
 {
     int first = get_first_position(MEM[index]);
@@ -81,6 +71,7 @@ int split(int index)
     return first;
 }
 
+// allocate memory according to size of process (-1 if no available memory for this size)
 int allocate_MEM(int process_size)
 {
     int memsize = round_mem_size(process_size);
@@ -93,6 +84,7 @@ int allocate_MEM(int process_size)
     return address;
 }
 
+// set max availble size in memory (-1 if no available)
 void setmaxavailable() {
     max_available = -1;
     for(int i = NO_LinkedLists - 1; i >= 0; --i) {
@@ -105,6 +97,7 @@ void setmaxavailable() {
         printf("No available memory \n");
 }
 
+// deallocate memory & merge up memory locations if possible
 void deallocate_MEM(int start_pos,int process_size)
 {
     int memsize = round_mem_size(process_size);
@@ -145,7 +138,7 @@ void deallocate_MEM(int start_pos,int process_size)
     }
     
 }
-
+// just debugging 
 void print_freemem ()
 {
     printf("Free Memory Start\n");
@@ -156,7 +149,7 @@ void print_freemem ()
     }
     printf("Free Memory End\n");
 }
-
+// free memory
 void DestroyMEM()
 {
     for(int i=0;i<NO_LinkedLists;i++)
@@ -165,3 +158,24 @@ void DestroyMEM()
         free(MEM[i]);
     }
 }
+
+// int split(SortedLinkedList **MEM, int index, int index2)
+// {
+//     if (index2 >)
+//         int address_index2 = get_first_position(MEM[index2]);
+//     if (address_index2 == -1)
+//     {
+//         int address = split(MEM, index, index2++);
+//         if (index == index2 - 1)
+//         {
+//         }
+//         else
+//         {
+//         }
+//     }
+//     else
+//     {
+//         insert_sorted(MEM[index2 - 1], address_index2 + pow(2, index2 - 1));
+//         return address_index2;
+//     }
+// }
