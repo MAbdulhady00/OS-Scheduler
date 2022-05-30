@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
             SchedulingNewProcessHandler(ReadyQueue, AvailableProcess);
             AvailableProcess->address_position = allocate_MEM(AvailableProcess->memsize);
             printf("Allocated mem for %d, pos: %d, memsize: %d\n", AvailableProcess->pid, AvailableProcess->address_position, AvailableProcess->memsize);
-            logMEM(memlogFile, AvailableProcess, time);
+            logMEM(memlogFile, AvailableProcess, time, false);
             AvailableProcess = WaitingGetAvailableProcess();
         }
 
@@ -143,9 +143,7 @@ int main(int argc, char *argv[])
         {
             //Wait for the process and deallocate
             waitpid(CurrentProcess->pWaitId, NULL, 0);
-            //deallocate_MEM(CurrentProcess->address_position, CurrentProcess->memsize);
             CurrentProcess->state = FINISHED;
-            //logMEM(memlogFile, CurrentProcess, time);
             SchedulingTerminationHandler(ReadyQueue);
 
             //Attempt to enqueue a process from waiting queue to ready queue
@@ -154,7 +152,7 @@ int main(int argc, char *argv[])
                 SchedulingNewProcessHandler(ReadyQueue, AvailableProcess);
                 AvailableProcess->address_position = allocate_MEM(AvailableProcess->memsize);
                 printf("Allocated mem for %d, pos: %d, memsize: %d\n", AvailableProcess->pid, AvailableProcess->address_position, AvailableProcess->memsize);
-                logMEM(memlogFile, AvailableProcess, time);
+                logMEM(memlogFile, AvailableProcess, time, false);
                 AvailableProcess = WaitingGetAvailableProcess();
             }
             
@@ -176,11 +174,10 @@ int main(int argc, char *argv[])
         if(CurrentProcess != NULL)
         {
             --CurrentProcess->remainingTime;
-            if(CurrentProcess->remainingTime ==0)
+            if(CurrentProcess->remainingTime <= 0)
             {
                 deallocate_MEM(CurrentProcess->address_position, CurrentProcess->memsize);
-                CurrentProcess->state = FINISHED;
-                logMEM(memlogFile, CurrentProcess, time);
+                logMEM(memlogFile, CurrentProcess, time, true);
             }
         }
         

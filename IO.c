@@ -76,7 +76,7 @@ void logProcess(FILE *logFile, process *p, int clk)
     }
 }
 
-void logMEM(FILE *logFileMEM, process *p, int clk)
+void logMEM(FILE *logFileMEM, process *p, int clk, bool deallocate)
 {
     int to = pow(2, ceil(log2(p->memsize)));
     if(to < 8)
@@ -84,7 +84,7 @@ void logMEM(FILE *logFileMEM, process *p, int clk)
 
     --to;
      
-    if(p->state == FINISHED)
+    if(deallocate)
     {
         fprintf(logFileMEM, "At time %d freed %d bytes for process %d from %d to %d \n",clk,p->memsize,p->pid,p->address_position,p->address_position + to);
     }
