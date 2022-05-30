@@ -1,7 +1,8 @@
 build:
+	g++ rrTest.cpp -o rrTest.out
 	gcc process_generator.c ./DataStructures/LinkedQueue.c -o process_generator.out
 	gcc clk.c -o clk.out
-	gcc scheduler.c IO.c process_data.c ./SchedulingAlgorithms/HPF.c ./SchedulingAlgorithms/SRTN.c ./SchedulingAlgorithms/RR.c ./DataStructures/Circular_Queue.c ./DataStructures/Priority_Queue.c ./DataStructures/Dynamic_Array.c ./Memory/Memory_Manager.c ./Memory/SortedLinkedList.c -o scheduler.out -lm
+	gcc scheduler.c IO.c process_data.c ./SchedulingAlgorithms/HPF.c ./SchedulingAlgorithms/SRTN.c ./SchedulingAlgorithms/RR.c ./DataStructures/Circular_Queue.c ./DataStructures/Priority_Queue.c ./DataStructures/Dynamic_Array.c -o scheduler.out -lm
 	gcc process.c -o process.out
 	gcc test_generator.c -o test_generator.out
 
@@ -31,6 +32,6 @@ test:
 testIO:
 	gcc ./Test/IO_Test.c ./DataStructures/LinkedQueue.c -o IO_Test.out
 	./IO_Test.out
-testmem:
-	gcc ./Memory/Memory_Manager.c ./Memory/test_memory_DS.c ./Memory/SortedLinkedList.c -o DS.out -lm
-	./DS.out
+testRR:
+	./rrTest.out 4
+

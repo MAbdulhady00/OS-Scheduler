@@ -179,9 +179,9 @@ int main(int argc, char **argv)
         fprintf(logFile, "At time %d process %d ", p[finished[i]].completion_time, p[finished[i]].pid);
         fprintf(logFile, "finished arr %d total %d remain 0 wait %d TA %d WTA %.2lf\n", p[finished[i]].arrival_time, p[finished[i]].burst_time, p[finished[i]].waiting_time, p[finished[i]].turnaround_time, WTA);
     }
-     cout<<"Average Turnaround Time = "<<avg_turnaround_time<<endl;
-     cout<<"Average Waiting Time = "<<avg_waiting_time<<endl;
-     cout<<"Average Response Time = "<<avg_response_time<<endl;
-     cout<<"CPU Utilization = "<<cpu_utilisation<<"%"<<endl;
-     cout<<"Throughput = "<<throughput<<" process/unit time"<<endl;
+    cout<<"Average Turnaround Time = "<<avg_turnaround_time<<endl;
+    cout<<"Average Waiting Time = "<<avg_waiting_time<<endl;
+    cout<<"Average Response Time = "<<avg_response_time<<endl;
+    cout<<"CPU Utilization = "<<cpu_utilisation<<"%"<<endl;
+    cout<<"Throughput = "<<throughput<<" process/unit time"<<endl;
 }

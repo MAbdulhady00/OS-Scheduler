@@ -13,7 +13,7 @@ EXTERN double sumWTA, sumWTASq, sumWaiting;
 EXTERN int nProcess, sumIdleTime;
 int finishtime = 0;
 
-void initializeOut(FILE **logFile, FILE **perfFile, FILE** memlogFile)
+void initializeOut(FILE **logFile, FILE **perfFile)
 {
     // Opening file in reading mode
     *logFile = fopen("scheduler.log", "w+");
@@ -29,21 +29,12 @@ void initializeOut(FILE **logFile, FILE **perfFile, FILE** memlogFile)
         printf("Error!");
         exit(1);
     }
-    *memlogFile = fopen("memory.log", "w+");
-    if (memlogFile == NULL)
-    {
-        printf("Error!");
-        exit(1);
-
-    }
-    fprintf(*memlogFile,"#At time x allocated y bytes for process z from i to j\n");
 }
 
-void freeOut(FILE *logFile, FILE *perfFile, FILE *memlogFile)
+void freeOut(FILE *logFile, FILE *perfFile)
 {
     fclose(perfFile);
     fclose(logFile);
-    fclose(memlogFile);
 }
 
 void logProcess(FILE *logFile, process *p, int clk)
@@ -52,13 +43,13 @@ void logProcess(FILE *logFile, process *p, int clk)
     switch (p->state)
     {
     case STARTED:
-        fprintf(logFile, "started arr %d total %d remain %d wait %d\n", p->arrivalTime, p->runningTime, p->remainingTime, p->waitTime);
+        fprintf(logFile, "started arr %d total %d remain %d wait %d\n", p->arrivalTime, p->runningTime, *p->remainingTime, p->waitTime);
         break;
     case RESUMED:
-        fprintf(logFile, "resumed arr %d total %d remain %d wait %d\n", p->arrivalTime, p->runningTime, p->remainingTime, p->waitTime);
+        fprintf(logFile, "resumed arr %d total %d remain %d wait %d\n", p->arrivalTime, p->runningTime, *p->remainingTime, p->waitTime);
         break;
     case STOPPED:
-        fprintf(logFile, "stopped arr %d total %d remain %d wait %d\n", p->arrivalTime, p->runningTime, p->remainingTime, p->waitTime);
+        fprintf(logFile, "stopped arr %d total %d remain %d wait %d\n", p->arrivalTime, p->runningTime, *p->remainingTime, p->waitTime);
         break;
     case FINISHED:
         ;
@@ -69,28 +60,10 @@ void logProcess(FILE *logFile, process *p, int clk)
         sumWaiting += p->waitTime;
         ++nProcess;
         finishtime = p->finishTime;
-        fprintf(logFile, "finished arr %d total %d remain %d wait %d TA %d WTA %.2lf\n", p->arrivalTime, p->runningTime, p->remainingTime, p->waitTime , p->finishTime - p->arrivalTime,WTA);
+        fprintf(logFile, "finished arr %d total %d remain %d wait %d TA %d WTA %.2lf\n", p->arrivalTime, p->runningTime, *p->remainingTime, p->waitTime , p->finishTime - p->arrivalTime,WTA);
         break;
     default:
         break;
-    }
-}
-
-void logMEM(FILE *logFileMEM, process *p, int clk, bool deallocate)
-{
-    int to = pow(2, ceil(log2(p->memsize)));
-    if(to < 8)
-        to = 8;
-
-    --to;
-     
-    if(deallocate)
-    {
-        fprintf(logFileMEM, "At time %d freed %d bytes for process %d from %d to %d \n",clk,p->memsize,p->pid,p->address_position,p->address_position + to);
-    }
-    else
-    {
-        fprintf(logFileMEM, "At time %d allocated %d bytes for process %d from %d to %d \n",clk,p->memsize,p->pid,p->address_position,p->address_position + to);
     }
 }
 

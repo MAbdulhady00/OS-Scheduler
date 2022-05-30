@@ -15,7 +15,7 @@ EXTERN process *CurrentProcess;
 EXTERN FILE *logFile;
 EXTERN int time;
 
-bool HPFCmp(process *p1, process *p2)
+static bool cmp(process *p1, process *p2)
 {
     if (p1->priority < p2->priority)
         return true;
@@ -28,7 +28,7 @@ bool HPFCmp(process *p1, process *p2)
 
 void *HPFInit(void *args)
 {
-    return CreatePriorirtyQueue(HPFCmp);
+    return CreatePriorirtyQueue(cmp);
 }
 
 void HPFNewProcessHandler(void *ReadyQueue, process *p)
@@ -68,6 +68,8 @@ void HPFTerminationHandler(void *ReadyQueue)
     CurrentProcess->state = FINISHED;
     CurrentProcess->finishTime = time;
     logProcess(logFile, CurrentProcess, time);
+    shmdt(CurrentProcess->remainingTime);
+    shmctl(CurrentProcess->shmid_process, IPC_RMID, (struct shmid_ds *)0);
     CurrentProcess = NULL;
     // if (PriorityQueueEmpty((PriorityQueue *)ReadyQueue)) 
     //    return;     

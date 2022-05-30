@@ -3,8 +3,6 @@
 
 void *RRInit(void *args);
 
-bool RRCmp(process *p1, process *p2);
-
 void SetQuantum(int q);
 
 void RRNewProcessHandler(void *ReadyQueue, process *p);

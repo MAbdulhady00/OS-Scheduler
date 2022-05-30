@@ -7,7 +7,6 @@ void SRTNEnqueue(void *ReadyQueue, process *p);
 
 process *SRTNRunNext(void *ReadyQueue);
 
-bool SRTNCmp(process *p1, process *p2);
 void SRTNNewProcessHandler(void* ReadyQueue, process* p);
 void SRTNTerminationHandler(void *ReadyQueue);
 void SRTNNewProcessFinalizationHandler(void *ReadyQueue);

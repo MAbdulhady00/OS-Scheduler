@@ -157,8 +157,6 @@ void ReadInput(LinkedQueue *Q)
         tmp->arrivalTime = atoi(strtok(NULL, "\t"));
         tmp->runningTime = atoi(strtok(NULL, "\t"));
         tmp->priority = atoi(strtok(NULL, "\t"));
-        tmp->memsize = atoi(strtok(NULL, "\t"));
-        tmp->remainingTime = tmp->runningTime;
         tmp->arrivalId = arrivalId++;
         enqueueLinkedQueue(Q, tmp);
     }
