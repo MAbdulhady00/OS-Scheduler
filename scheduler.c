@@ -24,22 +24,37 @@ EXTERN process *CurrentProcess = NULL;
 EXTERN int time = 0;
 EXTERN FILE *logFile, *perfFile, *memlogFile;
 EXTERN double sumWTA = 0, sumWTASq = 0, sumWaiting = 0;
-EXTERN int nProcess = 0, sumIdleTime = 0;;
-DynamicArray *ProcessTable; // Might need to change to hashtable
+EXTERN int nProcess = 0, sumIdleTime = 0;
+
+//DynamicArray *ProcessTable; 
 //LinkedQueue* Waiting_Queue;
+
+//Used for msg queue IPC with process generator
 struct msgBuffer msg;
 int msgid = 0;
+
 bool recievedFromGenerator = true;
 bool GenerationRunning = true;
 
 void *ReadyQueue;
 void *WaitingQueue[WAITING_QUEUE_SIZE];
+
+//
+//Scheduling algorithm
+//
+//Initialize ready queue
 void *(*SchedulingInit)(void *);
+//Enqueue new process
 void (*SchedulingNewProcessHandler)(void *, process *);
+//Attempt to run next if possible
 void (*SchedulingAttemptRunNext)(void *);
+//Terminate current process
 void (*SchedulingTerminationHandler)(void *);
+//Compare two process where if p1 < p2 then p1 will run first
 bool (*SchedulingCompare)(process*, process*);
+//Handle each new time slot
 void (*SchedulingTimeSlotHandler)();
+//Destroy ready queue
 void (*SchedulingDestroy)(void *);
 
 void NewProcess(int signum);
@@ -64,23 +79,28 @@ int quantum = 0;
 
 int main(int argc, char *argv[])
 {
-    signal(SIGINT, clearResources);
-    signal(SIGURG, GenerationFinalize);
+    //Set signal handlers
+    signal(SIGINT, clearResources);      //Signal from console (CTRL + C)
+    signal(SIGURG, GenerationFinalize);  //Signal from process generator
 
     initClk();
     msgid = atoi(argv[1]);
-    if (argc > 3)
+    if (argc > 3) //Algorithm == RR
     {
+        //Get quantum
         quantum = atoi(argv[3]);
         printf("Scheduler's msgid: %d, Algorithm: %s, Quantum: %d\n", msgid, argv[2], quantum);
     }
-    else
+    else  
     {
         printf("Scheduler's msgid: %d, Algorithm: %s\n", msgid, argv[2]);
     }
+    //Initialize using algorithm type
     initialize(atoi(argv[2]));
     printf("Initialized!\n");
+    //CLK time
     int time_before, time_after;
+    //Process in waiting queue current available to enqueue
     process* AvailableProcess = NULL;
     while (GenerationRunning || CurrentProcess != NULL)
     {
@@ -120,12 +140,14 @@ int main(int argc, char *argv[])
         SchedulingAttemptRunNext(ReadyQueue);
         while (CurrentProcess != NULL && CurrentProcess->remainingTime <= 0)
         {
+            //Wait for the process and deallocate
             waitpid(CurrentProcess->pWaitId, NULL, 0);
             deallocate_MEM(CurrentProcess->address_position, CurrentProcess->memsize);
             CurrentProcess->state = FINISHED;
             logMEM(memlogFile, CurrentProcess, time);
             SchedulingTerminationHandler(ReadyQueue);
 
+            //Attempt to enqueue a process from waiting queue to ready queue
             AvailableProcess = WaitingGetAvailableProcess();
             while(AvailableProcess != NULL)  {
                 SchedulingNewProcessHandler(ReadyQueue, AvailableProcess);
@@ -137,22 +159,26 @@ int main(int argc, char *argv[])
             
             SchedulingAttemptRunNext(ReadyQueue);
         }
-
+        
+        //Check if current time slot is idle
         if(CurrentProcess == NULL)
             ++sumIdleTime;
 
+        //Increment time slot
         while (time_after <= time_before)
         {
             time_after = getClk();
         }
         ++time;
 
+        //Decrement remaining time
         if(CurrentProcess != NULL)
             --CurrentProcess->remainingTime;
         
         time_before = getClk();
         printf("CLK: %d\n", time);
     }
+    //Create perf file
     logPerf(perfFile);
     SchedulingDestroy(ReadyQueue);
     // upon termination release the clock resources.
@@ -170,7 +196,7 @@ void initialize(AlgorithmType algorithmType)
 {
     CurrentProcess = NULL;
 
-    ProcessTable = CreateDynamicArray(PROCESS_TABLE_INITIAL_CAPACITY);
+    //ProcessTable = CreateDynamicArray(PROCESS_TABLE_INITIAL_CAPACITY);
 
     switch (algorithmType)
     {
@@ -204,6 +230,7 @@ void initialize(AlgorithmType algorithmType)
         SchedulingTimeSlotHandler = RRTimeSlotHandler;
         SchedulingDestroy = RRDestroy;
         break;
+
     default:
         break;
     }
@@ -217,6 +244,7 @@ void initialize(AlgorithmType algorithmType)
     //Initialize buddy memory allocator
     MEM_init();
 
+    //Initialize output files
     initializeOut(&logFile, &perfFile, &memlogFile);
 }
 
