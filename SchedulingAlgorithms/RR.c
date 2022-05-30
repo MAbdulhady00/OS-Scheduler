@@ -142,6 +142,7 @@ void SwitchProcess(void *ReadyQueue)
             // Stop Current Process
             kill((pid_t)CurrentProcess->pWaitId, SIGSTOP);
             CurrentProcess->state = STOPPED;
+            CurrentProcess->waitTime = time - CurrentProcess->arrivalTime - CurrentProcess->runningTime + CurrentProcess->remainingTime;
             logProcess(logFile, CurrentProcess, time);
             printf("Process %d Stopped!remain time %d\n", CurrentProcess->pid, CurrentProcess->remainingTime);
         }
@@ -158,6 +159,7 @@ void SwitchProcess(void *ReadyQueue)
             kill(p->pWaitId, SIGCONT);
             p->state = RESUMED;
             printf("Process %d Resumed! remain time %d\n", p->pid, p->remainingTime);
+            p->waitTime = time - p->arrivalTime - p->runningTime + p->remainingTime;
             logProcess(logFile, p, time);
             CurrentProcess = p;
         }
@@ -165,7 +167,7 @@ void SwitchProcess(void *ReadyQueue)
         {
             create_process(p);
             p->state = STARTED;
-            p->waitTime = p->waitTime == 0 ? time - p->arrivalTime : p->waitTime;
+            p->waitTime = time - p->arrivalTime - p->runningTime + p->remainingTime;
             CurrentProcess = p;
             logProcess(logFile, p, time);
         }
