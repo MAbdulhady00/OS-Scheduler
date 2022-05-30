@@ -179,7 +179,7 @@ int main(int argc, char *argv[])
             if(CurrentProcess->remainingTime ==0)
             {
                 deallocate_MEM(CurrentProcess->address_position, CurrentProcess->memsize);
-                //CurrentProcess->state = FINISHED;
+                CurrentProcess->state = FINISHED;
                 logMEM(memlogFile, CurrentProcess, time);
             }
         }

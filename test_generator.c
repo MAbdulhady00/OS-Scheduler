@@ -38,8 +38,8 @@ int main(int argc, char * argv[])
         pData.arrivaltime += rand() % (11); //processes arrives in order
         pData.runningtime = rand() % (30) + 1;
         pData.priority = rand() % (11);
-        pData.memorysize = rand()%256 +1;
-        //pData.memorysize = 1;
+        //pData.memorysize = rand()%256 +1;
+        pData.memorysize = 1;
 
         fprintf(pFile, "%d\t%d\t%d\t%d\t%d\n", pData.id, pData.arrivaltime, pData.runningtime, pData.priority,pData.memorysize);
     }
