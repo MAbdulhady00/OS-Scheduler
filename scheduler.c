@@ -230,6 +230,10 @@ void WaitingNewProcessHandler(process* p) {
 
 process* WaitingGetAvailableProcess() {
     setmaxavailable();
+    if(max_available <0)
+    {
+        return NULL;
+    }
     int n = max_available + 3;
     if(n > 8)
         n = 8;

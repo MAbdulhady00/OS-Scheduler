@@ -101,6 +101,8 @@ void setmaxavailable() {
             return;
         }
     }
+    if(max_available == -1)
+        printf("No available memory \n");
 }
 
 void deallocate_MEM(int start_pos,int process_size)

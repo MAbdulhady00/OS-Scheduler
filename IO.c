@@ -84,11 +84,11 @@ void logMEM(FILE *logFileMEM, process *p, int clk)
      
     if(p->state == FINISHED)
     {
-        fprintf(logFileMEM, "at time %d deallocated %d bytes for process %d from %d to %d \n",clk,p->memsize,p->pid,p->address_position,p->address_position + to);
+        fprintf(logFileMEM, "At time %d deallocated %d bytes for process %d from %d to %d \n",clk,p->memsize,p->pid,p->address_position,p->address_position + to);
     }
     else
     {
-        fprintf(logFileMEM, "at time %d allocated %d bytes for process %d from %d to %d \n",clk,p->memsize,p->pid,p->address_position,p->address_position + to);
+        fprintf(logFileMEM, "At time %d allocated %d bytes for process %d from %d to %d \n",clk,p->memsize,p->pid,p->address_position,p->address_position + to);
     }
 }
 
