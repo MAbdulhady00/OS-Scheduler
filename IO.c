@@ -34,7 +34,9 @@ void initializeOut(FILE **logFile, FILE **perfFile, FILE** memlogFile)
     {
         printf("Error!");
         exit(1);
+
     }
+    fprintf(*memlogFile,"#At time x allocated y bytes for process z from i to j\n");
 }
 
 void freeOut(FILE *logFile, FILE *perfFile, FILE *memlogFile)
@@ -84,7 +86,7 @@ void logMEM(FILE *logFileMEM, process *p, int clk)
      
     if(p->state == FINISHED)
     {
-        fprintf(logFileMEM, "At time %d deallocated %d bytes for process %d from %d to %d \n",clk,p->memsize,p->pid,p->address_position,p->address_position + to);
+        fprintf(logFileMEM, "At time %d freed %d bytes for process %d from %d to %d \n",clk,p->memsize,p->pid,p->address_position,p->address_position + to);
     }
     else
     {
