@@ -127,11 +127,12 @@ int main(int argc, char *argv[])
             SchedulingTerminationHandler(ReadyQueue);
 
             AvailableProcess = WaitingGetAvailableProcess();
-            if(AvailableProcess != NULL)  {
+            while(AvailableProcess != NULL)  {
                 SchedulingNewProcessHandler(ReadyQueue, AvailableProcess);
                 AvailableProcess->address_position = allocate_MEM(AvailableProcess->memsize);
                 printf("Allocated mem for %d, pos: %d, memsize: %d\n", AvailableProcess->pid, AvailableProcess->address_position, AvailableProcess->memsize);
                 logMEM(memlogFile, AvailableProcess, time);
+                AvailableProcess = WaitingGetAvailableProcess();
             }
             
             SchedulingAttemptRunNext(ReadyQueue);

@@ -59,6 +59,7 @@ void logProcess(FILE *logFile, process *p, int clk)
         fprintf(logFile, "stopped arr %d total %d remain %d wait %d\n", p->arrivalTime, p->runningTime, p->remainingTime, p->waitTime);
         break;
     case FINISHED:
+        ;
         double WTA =  ((double)p->finishTime - (double)p->arrivalTime) / p->runningTime;
         APPROXIMATE2(WTA);
         sumWTA += WTA;
